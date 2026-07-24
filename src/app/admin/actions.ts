@@ -28,6 +28,8 @@ export async function createSurvey(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string || "";
+  const type = formData.get("type") as "CUSTOM" | "FIXED_SCALE" || "CUSTOM";
+  const globalOptionsRaw = formData.get("globalOptions") as string;
 
   if (!title) return;
 
@@ -35,7 +37,13 @@ export async function createSurvey(formData: FormData) {
     data: {
       title,
       description,
-      authorId: session.user.id
+      type,
+      authorId: session.user.id,
+      ...(type === 'FIXED_SCALE' && globalOptionsRaw ? {
+        options: {
+          create: JSON.parse(globalOptionsRaw).map((text: string) => ({ text }))
+        }
+      } : {})
     }
   });
 

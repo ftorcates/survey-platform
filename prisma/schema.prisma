@@ -6,16 +6,23 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SurveyType {
+  CUSTOM
+  FIXED_SCALE
+}
+
 model Survey {
   id          String     @id @default(cuid())
   title       String
   description String?
+  type        SurveyType @default(CUSTOM)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   authorId    String?
   questions   Question[]
   responses   Response[]
   author      User?      @relation(fields: [authorId], references: [id])
+  options     Option[]
 }
 
 model User {
@@ -76,12 +83,14 @@ model Question {
 }
 
 model Option {
-  id             String   @id @default(cuid())
-  questionId     String
+  id             String    @id @default(cuid())
+  questionId     String?
+  surveyId       String?
   text           String
   nextQuestionId String?
   answers        Answer[]
-  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question       Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  survey         Survey?   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
 
 model Response {

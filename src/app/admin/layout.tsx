@@ -6,12 +6,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
       {/* Sidebar */}
-      <aside style={{ width: '250px', backgroundColor: 'var(--color-surface)', borderRight: '1px solid var(--color-border)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column' }}>
+      <aside className="glass-panel" style={{ width: '250px', borderRight: '1px solid var(--color-border)', padding: '2rem 1rem', display: 'flex', flexDirection: 'column', margin: '1rem', height: 'calc(100vh - 2rem)', borderRadius: 'var(--radius-xl)' }}>
         <div style={{ padding: '0 1rem', marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)' }}>SurveyAdmin</h2>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text' }}>
+            SurveyAdmin
+          </h2>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
-          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', color: 'var(--color-text-main)', textDecoration: 'none', backgroundColor: 'var(--color-surface-hover)' }}>
+          <Link href="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', color: 'var(--color-text-main)', textDecoration: 'none', backgroundColor: 'var(--color-surface-hover)', fontWeight: 600 }}>
             <LayoutDashboard size={20} /> Dashboard
           </Link>
           <Link href="/admin/audience" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', color: 'var(--color-text-muted)', textDecoration: 'none' }}>
