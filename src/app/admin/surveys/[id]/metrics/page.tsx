@@ -12,6 +12,9 @@ export default async function MetricsPage({ params }: { params: Promise<{ id: st
   const survey = await prisma.survey.findUnique({
     where: { id: resolvedParams.id },
     include: {
+      options: {
+        orderBy: { id: 'asc' }
+      },
       responses: true,
       questions: {
         orderBy: { order: 'asc' },

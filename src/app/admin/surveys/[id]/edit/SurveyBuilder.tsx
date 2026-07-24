@@ -11,7 +11,7 @@ import {
   deleteQuestion,
   deleteOption
 } from "./actions"
-import { Plus, GitBranch, Edit3, Trash2, Check, X, Save } from "lucide-react"
+import { Plus, GitBranch, Edit3, Trash2, Check, X, Save, List } from "lucide-react"
 
 type SurveyData = any;
 
@@ -61,7 +61,14 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
         {!isEditingHeader ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ flex: 1 }}>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '0.5rem' }}>{survey.title}</h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text-main)' }}>{survey.title}</h1>
+                {survey.type === 'FIXED_SCALE' && (
+                  <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: 'var(--color-primary)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <List size={14} /> Escala Fija
+                  </span>
+                )}
+              </div>
               <p style={{ color: 'var(--color-text-muted)' }}>{survey.description || "Sin descripción"}</p>
             </div>
             <button onClick={() => setIsEditingHeader(true)} className="btn-secondary" style={{ padding: '0.5rem' }}>
@@ -93,6 +100,20 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
           </div>
         )}
       </div>
+
+      {survey.type === 'FIXED_SCALE' && (
+        <div className="glass-panel" style={{ padding: '1rem 1.5rem', borderLeft: '4px solid var(--color-cta)', backgroundColor: 'rgba(var(--color-cta-rgb), 0.05)' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Opciones Globales</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Todas las preguntas de esta encuesta usarán estas opciones:</p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {survey.options?.map((opt: any) => (
+              <span key={opt.id} style={{ fontSize: '0.875rem', padding: '0.25rem 0.75rem', backgroundColor: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: '99px' }}>
+                {opt.text}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* Questions List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -116,7 +137,7 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
                   </div>
                 </div>
 
-                {q.type !== 'TEXT' && (
+                {survey.type !== 'FIXED_SCALE' && q.type !== 'TEXT' && (
                   <div style={{ marginLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {q.options.map((opt: any) => (
                       <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
@@ -154,7 +175,7 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
                   </div>
                 )}
 
-                {q.type === 'TEXT' && (
+                {survey.type !== 'FIXED_SCALE' && q.type === 'TEXT' && (
                   <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--color-background)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
                     <GitBranch size={16} color="var(--color-text-muted)" />
                     <span style={{ fontSize: '0.875rem' }}>Lógica de ramificación: </span>
@@ -222,16 +243,22 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
             onChange={e => setNewQuestionText(e.target.value)}
           />
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <select 
-              className="input-base" 
-              style={{ flex: 1 }}
-              value={newQuestionType}
-              onChange={e => setNewQuestionType(e.target.value as any)}
-            >
-              <option value="SINGLE_CHOICE">Selección Única (Una sola respuesta)</option>
-              <option value="MULTIPLE_CHOICE">Selección Múltiple (Varias respuestas)</option>
-              <option value="TEXT">Respuesta de Texto Abierta</option>
-            </select>
+            {survey.type !== 'FIXED_SCALE' ? (
+              <select 
+                className="input-base" 
+                style={{ flex: 1 }}
+                value={newQuestionType}
+                onChange={e => setNewQuestionType(e.target.value as any)}
+              >
+                <option value="SINGLE_CHOICE">Selección Única (Una sola respuesta)</option>
+                <option value="MULTIPLE_CHOICE">Selección Múltiple (Varias respuestas)</option>
+                <option value="TEXT">Respuesta de Texto Abierta</option>
+              </select>
+            ) : (
+              <span style={{ flex: 1, fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
+                Se usará la escala fija global para esta pregunta.
+              </span>
+            )}
             <button className="btn-primary" onClick={handleAddQuestion}>
               <Plus size={18} /> Agregar Pregunta
             </button>

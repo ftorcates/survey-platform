@@ -11,7 +11,7 @@ export default async function AudiencePage() {
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-text-main)', marginBottom: '0.5rem' }}>Audiencia Global</h1>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text', marginBottom: '0.5rem' }}>Audiencia Global</h1>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>
           Gestiona y analiza a todos los participantes de tus estudios en un solo lugar.
         </p>
