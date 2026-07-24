@@ -124,34 +124,42 @@ export default function SurveyClient({ survey }: { survey: any }) {
           <span style={{ display: 'inline-block', padding: '0.25rem 1rem', borderRadius: 'var(--radius-full)', backgroundColor: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-cta)', fontSize: '0.875rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             Fase de Preparación
           </span>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Conociéndote un poco</h2>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>Esta experiencia es 100% anónima. Tus datos nos ayudan a mejorar nuestras métricas.</p>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>
+            {survey.requireDemographics ? 'Conociéndote un poco' : '¡Bienvenido!'}
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
+            {survey.requireDemographics 
+              ? 'Esta experiencia es 100% anónima. Tus datos nos ayudan a mejorar nuestras métricas.'
+              : 'Estás a punto de comenzar la encuesta. Tus respuestas son completamente anónimas.'}
+          </p>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué rango de edad te encuentras?</label>
-            <select className="input-base" style={{ padding: '1rem' }} value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
-              <option value="">Selecciona una opción...</option>
-              <option value="18-24">18 - 24 años</option>
-              <option value="25-34">25 - 34 años</option>
-              <option value="35-44">35 - 44 años</option>
-              <option value="45-54">45 - 54 años</option>
-              <option value="55+">55+ años</option>
-              <option value="none">Prefiero no decirlo</option>
-            </select>
+        {survey.requireDemographics && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué rango de edad te encuentras?</label>
+              <select className="input-base" style={{ padding: '1rem' }} value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
+                <option value="">Selecciona una opción...</option>
+                <option value="18-24">18 - 24 años</option>
+                <option value="25-34">25 - 34 años</option>
+                <option value="35-44">35 - 44 años</option>
+                <option value="45-54">45 - 54 años</option>
+                <option value="55+">55+ años</option>
+                <option value="none">Prefiero no decirlo</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Con qué género te identificas?</label>
+              <select className="input-base" style={{ padding: '1rem' }} value={sex} onChange={e => setSex(e.target.value)}>
+                <option value="">Selecciona una opción...</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="Other">Otro</option>
+                <option value="none">Prefiero no decirlo</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Con qué género te identificas?</label>
-            <select className="input-base" style={{ padding: '1rem' }} value={sex} onChange={e => setSex(e.target.value)}>
-              <option value="">Selecciona una opción...</option>
-              <option value="M">Masculino</option>
-              <option value="F">Femenino</option>
-              <option value="Other">Otro</option>
-              <option value="none">Prefiero no decirlo</option>
-            </select>
-          </div>
-        </div>
+        )}
         <button className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} onClick={handleStart} disabled={isSubmitting}>
           {isSubmitting ? 'Cargando...' : '¡Iniciar Experiencia!'}
         </button>

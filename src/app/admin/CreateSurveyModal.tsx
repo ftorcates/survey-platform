@@ -57,6 +57,19 @@ export default function CreateSurveyModal() {
                 />
               </div>
 
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input 
+                  type="checkbox" 
+                  name="requireDemographics" 
+                  id="requireDemographics" 
+                  defaultChecked
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
+                />
+                <label htmlFor="requireDemographics" style={{ fontWeight: 500, cursor: 'pointer', color: 'var(--color-text-main)' }}>
+                  Solicitar información demográfica de los participantes (edad y género)
+                </label>
+              </div>
+
               <div style={{ marginBottom: '1.5rem' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Tipo de Encuesta</label>
                 
