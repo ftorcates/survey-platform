@@ -240,17 +240,48 @@ export default function SurveyClient({ survey }: { survey: any }) {
           {survey.type === 'FIXED_SCALE' && survey.includeLikertTable && survey.options && survey.options.length > 0 && (
             <div style={{ marginTop: '2.5rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '1.25rem' }}>
-                Escala y opciones de valoración aplicables:
+                Tabla de opciones de respuesta:
               </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
-                {survey.options.map((opt: any, index: number) => (
-                  <div key={opt.id} style={{ background: 'rgba(159, 232, 112, 0.08)', border: '1px solid rgba(159, 232, 112, 0.3)', padding: '0.65rem 1.4rem', borderRadius: '30px', fontSize: '1rem', fontWeight: 600, color: 'var(--color-primary)' }}>
-                    {index + 1}. {opt.text}
-                  </div>
-                ))}
+              <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255, 255, 255, 0.04)', borderBottom: '1px solid var(--color-border)' }}>
+                      <th style={{ padding: '1rem 1.5rem', width: '25%', color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.95rem' }}>Nivel / Puntuación</th>
+                      <th style={{ padding: '1rem 1.5rem', color: 'var(--color-text-main)', fontWeight: 600, fontSize: '0.95rem' }}>Opción de valoración (Escala)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {survey.options.map((opt: any, index: number) => (
+                      <tr key={opt.id} style={{ borderBottom: index < survey.options.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+                        <td style={{ padding: '1rem 1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{index + 1}</td>
+                        <td style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-main)', fontSize: '1.05rem' }}>{opt.text}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
+
+          {/* Mensaje final de agradecimiento previo */}
+          <div style={{ 
+            marginTop: '2.5rem', 
+            padding: '1.5rem 2rem', 
+            borderRadius: 'var(--radius-lg)', 
+            background: 'linear-gradient(90deg, rgba(159, 232, 112, 0.1), rgba(255, 255, 255, 0.02))', 
+            borderLeft: '4px solid var(--color-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            borderRight: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--color-border)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🙌</span>
+            <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--color-text-main)', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
+              &quot;Agradecemos y apreciamos mucho su participación {survey.isMandatory ? 'obligatoria' : 'voluntaria'} en el proceso.&quot;
+            </p>
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', paddingTop: '1.75rem', borderTop: '1px solid var(--color-border)' }}>
