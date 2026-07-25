@@ -13,6 +13,9 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
     where: { id: resolvedParams.id },
     include: {
       options: true,
+      blocks: {
+        orderBy: { order: 'asc' }
+      },
       questions: {
         orderBy: { order: 'asc' },
         include: {

@@ -23,6 +23,31 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
   // Matrix answer state (Fixed Scale flow)
   const [matrixAnswers, setMatrixAnswers] = useState<Record<string, string>>({});
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+
+  // Build blocks sequence for FIXED_SCALE surveys
+  const rawBlocks = survey.blocks || [];
+  const allQuestions = survey.questions || [];
+  const unassignedQuestions = allQuestions.filter((q: any) => !q.blockId);
+  let activeBlocks: { id: string; title: string; questions: any[] }[] = [];
+  if (rawBlocks.length > 0) {
+    if (unassignedQuestions.length > 0) {
+      activeBlocks.push({ id: 'unassigned', title: 'Preguntas Generales', questions: unassignedQuestions });
+    }
+    for (const b of rawBlocks) {
+      const bQs = allQuestions.filter((q: any) => q.blockId === b.id);
+      if (bQs.length > 0) {
+        activeBlocks.push({ id: b.id, title: b.title, questions: bQs });
+      }
+    }
+  } else {
+    activeBlocks = [{ id: 'default', title: 'Evaluación de Afirmaciones', questions: allQuestions }];
+  }
+  if (activeBlocks.length === 0) {
+    activeBlocks = [{ id: 'empty', title: 'Evaluación', questions: [] }];
+  }
+  const currentBlockQuestions = activeBlocks[currentBlockIndex]?.questions || [];
+  const isCurrentBlockComplete = currentBlockQuestions.every((q: any) => Boolean(matrixAnswers[q.id]));
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -409,69 +434,117 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
       {/* FIXED SCALE (MATRIX) FLOW */}
       {survey.type === 'FIXED_SCALE' ? (
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2.5rem', width: '100%' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <span className="eyebrow">Escala completa</span>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>Por favor evalúa las siguientes afirmaciones</h2>
-          </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentBlockIndex}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            className="card"
+            style={{ padding: '2.5rem', width: '100%' }}
+          >
+            <div style={{ marginBottom: '2rem' }}>
+              <span className="eyebrow">
+                {activeBlocks.length > 1 ? `Bloque ${currentBlockIndex + 1} de ${activeBlocks.length}` : "Escala completa"}
+              </span>
+              <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>
+                Por favor evalúa las siguientes afirmaciones
+              </h2>
+            </div>
 
-          <div style={{ overflowX: 'auto', marginBottom: '2.5rem' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '600px' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid var(--color-border)', width: '35%' }}>Afirmación</th>
-                  {survey.options.map((opt: any) => (
-                    <th key={opt.id} style={{ padding: '1rem', borderBottom: '2px solid var(--color-border)', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.875rem', width: `${65 / survey.options.length}%` }}>
-                      {opt.text}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {survey.questions.map((q: any) => (
-                  <tr key={q.id} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: matrixAnswers[q.id] ? 'transparent' : 'rgba(239, 68, 68, 0.02)' }}>
-                    <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>{q.text}</td>
+            <div style={{ overflowX: 'auto', marginBottom: '2.5rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '600px' }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid var(--color-border)', width: '35%' }}>Afirmación</th>
                     {survey.options.map((opt: any) => (
-                      <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
-                        <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
-                          <div style={{
-                            width: '26px',
-                            height: '26px',
-                            borderRadius: '50%',
-                            border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s',
-                            backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.15)' : 'transparent'
-                          }}>
-                            {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
-                          </div>
-                          <input
-                            type="radio"
-                            name={`matrix-${q.id}`}
-                            checked={matrixAnswers[q.id] === opt.id}
-                            onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
-                            style={{ display: 'none' }}
-                          />
-                        </label>
-                      </td>
+                      <th key={opt.id} style={{ padding: '1rem', borderBottom: '2px solid var(--color-border)', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.875rem', width: `${65 / survey.options.length}%` }}>
+                        {opt.text}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {currentBlockQuestions.map((q: any) => (
+                    <tr key={q.id} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: matrixAnswers[q.id] ? 'transparent' : 'rgba(239, 68, 68, 0.02)' }}>
+                      <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>{q.text}</td>
+                      {survey.options.map((opt: any) => (
+                        <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
+                          <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
+                            <div style={{
+                              width: '26px',
+                              height: '26px',
+                              borderRadius: '50%',
+                              border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s',
+                              backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.15)' : 'transparent'
+                            }}>
+                              {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
+                            </div>
+                            <input
+                              type="radio"
+                              name={`matrix-${q.id}`}
+                              checked={matrixAnswers[q.id] === opt.id}
+                              onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <button
-            className="btn-primary"
-            onClick={handleSubmitMatrix}
-            disabled={isSubmitting || Object.keys(matrixAnswers).length < survey.questions.length}
-            style={{ width: '100%', padding: '1.25rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
-          >
-            {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
-          </button>
-        </motion.div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              {currentBlockIndex > 0 ? (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => {
+                    setCurrentBlockIndex(prev => prev - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  style={{ padding: '1.25rem 2.5rem', fontSize: '1.1rem', fontWeight: 700, borderRadius: '40px' }}
+                >
+                  ← Volver al bloque anterior
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {currentBlockIndex < activeBlocks.length - 1 ? (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    setCurrentBlockIndex(prev => prev + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  disabled={!isCurrentBlockComplete}
+                  style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px', marginLeft: 'auto' }}
+                >
+                  Siguiente →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={handleSubmitMatrix}
+                  disabled={isSubmitting || !isCurrentBlockComplete}
+                  style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px', marginLeft: 'auto' }}
+                >
+                  {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       ) : (
         /* DYNAMIC FLOW */
         (() => {

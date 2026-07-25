@@ -28,8 +28,9 @@ model Survey {
   authorId            String?
   questions           Question[]
   responses           Response[]
-  author              User?      @relation(fields: [authorId], references: [id])
+  author              User?          @relation(fields: [authorId], references: [id])
   options             Option[]
+  blocks              QuestionBlock[]
 }
 
 model User {
@@ -84,9 +85,21 @@ model Question {
   type           QuestionType
   order          Int
   nextQuestionId String?
+  blockId        String?
+  block          QuestionBlock? @relation(fields: [blockId], references: [id], onDelete: SetNull)
   answers        Answer[]
   options        Option[]
   survey         Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+}
+
+model QuestionBlock {
+  id          String     @id @default(cuid())
+  surveyId    String
+  title       String     @default("Bloque 1")
+  description String?
+  order       Int        @default(1)
+  questions   Question[]
+  survey      Survey     @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
 
 model Option {
