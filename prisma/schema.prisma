@@ -15,6 +15,12 @@ model Survey {
   id                  String     @id @default(cuid())
   title               String
   description         String?
+  image               String?
+  organization        String?
+  department          String?
+  subdepartment       String?
+  includeLikertTable  Boolean    @default(false)
+  isMandatory         Boolean    @default(true)
   type                SurveyType @default(CUSTOM)
   requireDemographics Boolean    @default(true)
   createdAt           DateTime   @default(now())

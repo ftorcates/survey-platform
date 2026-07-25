@@ -28,7 +28,13 @@ export async function createSurvey(formData: FormData) {
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string || "";
+  const image = (formData.get("image") as string) || null;
+  const organization = (formData.get("organization") as string) || null;
+  const department = (formData.get("department") as string) || null;
+  const subdepartment = (formData.get("subdepartment") as string) || null;
   const type = formData.get("type") as "CUSTOM" | "FIXED_SCALE" || "CUSTOM";
+  const includeLikertTable = type === "FIXED_SCALE" && formData.get("includeLikertTable") === "on";
+  const isMandatory = formData.get("isMandatory") !== "false";
   const globalOptionsRaw = formData.get("globalOptions") as string;
   const requireDemographics = formData.get("requireDemographics") === "on";
 
@@ -38,6 +44,12 @@ export async function createSurvey(formData: FormData) {
     data: {
       title,
       description,
+      image,
+      organization,
+      department,
+      subdepartment,
+      includeLikertTable,
+      isMandatory,
       type,
       requireDemographics,
       authorId: session.user.id,
