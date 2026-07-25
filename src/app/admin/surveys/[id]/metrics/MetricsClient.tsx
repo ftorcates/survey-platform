@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from 'recharts';
 import { toPng, toJpeg } from 'html-to-image';
 
@@ -28,7 +28,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
   
   if (totalResponses === 0) {
     return (
-      <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+      <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.125rem' }}>Aún no hay respuestas para esta encuesta. Comparte el enlace para empezar a recolectar datos.</p>
       </div>
     )
@@ -163,12 +163,12 @@ export default function MetricsClient({ survey }: { survey: any }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* Resumen */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center' }}>
-          <h3 style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Total de Respuestas</h3>
-          <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{totalResponses}</p>
+      <div className="stats-grid">
+        <div className="card stat-card" style={{ textAlign: 'center' }}>
+          <h3 className="stat-label">Total de respuestas</h3>
+          <p style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary)', marginTop: "0.65rem" }}>{totalResponses}</p>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <button onClick={exportToExcel} className="btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -183,7 +183,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
       {/* Demographics */}
       <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginTop: '1rem' }}>Datos Demográficos</h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        <div id="chart-edad" className="glass-panel" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
+        <div id="chart-edad" className="card" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
           <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
             <button onClick={() => downloadImage('chart-edad', 'png', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
             <button onClick={() => downloadImage('chart-edad', 'jpeg', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
@@ -202,7 +202,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
           </ResponsiveContainer>
         </div>
         
-        <div id="chart-sexo" className="glass-panel" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
+        <div id="chart-sexo" className="card" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
           <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
             <button onClick={() => downloadImage('chart-sexo', 'png', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
             <button onClick={() => downloadImage('chart-sexo', 'jpeg', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
@@ -226,7 +226,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
       {survey.type === 'FIXED_SCALE' && survey.options && (
         <>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginTop: '2rem' }}>Resumen General (Toda la Encuesta)</h2>
-          <div id="chart-global" className="glass-panel" style={{ padding: '1.5rem', height: '400px', minWidth: 0, position: 'relative' }}>
+          <div id="chart-global" className="card" style={{ padding: '1.5rem', height: '400px', minWidth: 0, position: 'relative' }}>
             <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
               <button onClick={() => downloadImage('chart-global', 'png', 'resumen_general')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
               <button onClick={() => downloadImage('chart-global', 'jpeg', 'resumen_general')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
@@ -267,13 +267,13 @@ export default function MetricsClient({ survey }: { survey: any }) {
           if (q.type === 'TEXT') {
             const textAnswers = q.answers.filter((a:any) => a.textValue).map((a:any) => a.textValue);
             return (
-              <div key={q.id} className="glass-panel" style={{ padding: '1.5rem' }}>
+              <div key={q.id} className="card" style={{ padding: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>{i + 1}. {q.text}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
                   {textAnswers.length === 0 ? <p style={{ color: 'var(--color-text-muted)' }}>No hay respuestas.</p> : null}
                   {textAnswers.map((txt: string, idx: number) => (
-                    <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>
-                      "{txt}"
+                    <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.6)', borderRadius: '1rem', fontSize: '0.875rem', border: '1px solid var(--color-border)' }}>
+                      &ldquo;{txt}&rdquo;
                     </div>
                   ))}
                 </div>
@@ -296,7 +296,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
           return (
             <div key={q.id} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
               {/* Bar Chart Panel */}
-              <div id={`chart-q-bar-${q.id}`} className="glass-panel" style={{ padding: '1.5rem', position: 'relative' }}>
+              <div id={`chart-q-bar-${q.id}`} className="card" style={{ padding: '1.5rem', position: 'relative' }}>
                 <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
                   <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'png', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
                   <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'jpeg', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
@@ -318,7 +318,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
               </div>
 
               {/* Pie Chart Panel */}
-              <div id={`chart-q-pie-${q.id}`} className="glass-panel" style={{ padding: '1.5rem', position: 'relative' }}>
+              <div id={`chart-q-pie-${q.id}`} className="card" style={{ padding: '1.5rem', position: 'relative' }}>
                 <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
                   <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'png', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
                   <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'jpeg', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>

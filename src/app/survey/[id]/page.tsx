@@ -23,15 +23,20 @@ export default async function SurveyPage({ params }: { params: Promise<{ id: str
   if (!survey) return notFound();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="glass-panel" style={{ margin: '1rem', padding: '1rem', textAlign: 'center', borderRadius: 'var(--radius-xl)' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text' }}>
-          {survey.title}
-        </h1>
-      </header>
-      
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ width: '100%', maxWidth: '700px', position: 'relative' }}>
+    <div className="container page-shell" style={{ minHeight: '100vh', display: 'grid', alignItems: 'center' }}>
+      <main className="survey-frame" style={{ position: 'relative' }}>
+        <header className="glass-panel hero-panel" style={{ marginBottom: "1rem", textAlign: 'center', padding: "1.5rem" }}>
+          <div className="eyebrow" style={{ justifyContent: "center", marginBottom: "0.8rem" }}>Encuesta activa</div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+            {survey.title}
+          </h1>
+          {survey.description ? (
+            <p style={{ color: "var(--color-text-muted)", marginTop: "0.75rem", lineHeight: 1.7 }}>
+              {survey.description}
+            </p>
+          ) : null}
+        </header>
+        <div style={{ width: '100%', position: 'relative' }}>
           <SurveyClient survey={survey} />
         </div>
       </main>

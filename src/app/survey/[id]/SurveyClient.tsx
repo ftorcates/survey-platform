@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -108,9 +109,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
   if (currentStep === -2) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.8, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="glass-panel" style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '4px solid var(--color-success)' }}>
+      <motion.div initial={{ opacity: 0, scale: 0.8, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="card" style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '4px solid var(--color-success)' }}>
         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-success), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text', marginBottom: '1.5rem' }}>
-          ¡Misión Cumplida! 🚀
+          Respuesta registrada
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.125rem' }}>Tus respuestas han sido registradas exitosamente y de forma anónima. ¡Gracias por tu tiempo!</p>
       </motion.div>
@@ -119,11 +120,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
   if (currentStep === -1) {
     return (
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2.5rem' }}>
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span style={{ display: 'inline-block', padding: '0.25rem 1rem', borderRadius: 'var(--radius-full)', backgroundColor: 'rgba(6, 182, 212, 0.1)', color: 'var(--color-cta)', fontSize: '0.875rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            Fase de Preparación
-          </span>
+          <span className="eyebrow">Antes de comenzar</span>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>
             {survey.requireDemographics ? 'Conociéndote un poco' : '¡Bienvenido!'}
           </h2>
@@ -161,7 +160,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
           </div>
         )}
         <button className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} onClick={handleStart} disabled={isSubmitting}>
-          {isSubmitting ? 'Cargando...' : '¡Iniciar Experiencia!'}
+          {isSubmitting ? 'Cargando...' : 'Comenzar encuesta'}
         </button>
       </motion.div>
     );
@@ -169,14 +168,10 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
   // --- FIXED SCALE (MATRIX) FLOW ---
   if (survey.type === 'FIXED_SCALE' && currentStep === 0) {
-    const isMatrixComplete = survey.questions.every((q: any) => matrixAnswers[q.id]);
-    
     return (
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '2rem' }}>
-          <span style={{ fontSize: '0.875rem', color: 'var(--color-cta)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            Encuesta Completa
-          </span>
+          <span className="eyebrow">Escala completa</span>
           <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>Por favor evalúa las siguientes afirmaciones</h2>
         </div>
 
@@ -199,7 +194,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                   {survey.options.map((opt: any) => (
                     <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
                       <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
-                        <div style={{ 
+                        <div style={{
                           width: '24px', 
                           height: '24px', 
                           borderRadius: '50%', 
@@ -208,7 +203,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                           alignItems: 'center',
                           justifyContent: 'center',
                           transition: 'all 0.2s',
-                          backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(124, 58, 237, 0.1)' : 'transparent'
+                          backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(15, 118, 110, 0.1)' : 'transparent'
                         }}>
                           {matrixAnswers[q.id] === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
                         </div>
@@ -234,7 +229,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
           disabled={isSubmitting}
           style={{ width: '100%', padding: '1.25rem', fontSize: '1.125rem', opacity: 1 }}
         >
-          {isSubmitting ? 'Guardando...' : 'Finalizar Encuesta'}
+            {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
         </button>
       </motion.div>
     );
@@ -252,11 +247,11 @@ export default function SurveyClient({ survey }: { survey: any }) {
         animate={{ opacity: 1, x: 0, scale: 1 }} 
         exit={{ opacity: 0, x: -100, scale: 0.95 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="glass-panel" 
+        className="card" 
         style={{ padding: '0', overflow: 'hidden' }}
       >
         {/* Progress Bar */}
-        <div style={{ width: '100%', height: '6px', backgroundColor: 'var(--color-surface-hover)' }}>
+        <div className="progress-track" style={{ borderRadius: 0 }}>
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
@@ -267,7 +262,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
         <div style={{ padding: '3rem 2.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '0.875rem', color: 'var(--color-cta)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <span className="eyebrow">
               Pregunta {currentStep + 1} de {survey.questions.length}
             </span>
           </div>
@@ -286,21 +281,10 @@ export default function SurveyClient({ survey }: { survey: any }) {
               />
             )}
 
-            {q.type === 'SINGLE_CHOICE' && q.options.map((opt:any, idx: number) => (
+            {q.type === 'SINGLE_CHOICE' && q.options.map((opt:any) => (
               <label 
                 key={opt.id} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  padding: '1.25rem', 
-                  backgroundColor: selectedOptionId === opt.id ? 'rgba(124, 58, 237, 0.08)' : 'var(--color-surface)', 
-                  border: `2px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'transparent'}`, 
-                  borderRadius: 'var(--radius-lg)', 
-                  cursor: 'pointer', 
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: selectedOptionId === opt.id ? '0 4px 12px rgba(124, 58, 237, 0.15)' : '0 2px 4px rgba(0,0,0,0.02)'
-                }}
+                className={`question-option ${selectedOptionId === opt.id ? "question-option-active" : ""}`}
               >
                 <div style={{ 
                   width: '24px', 
@@ -328,18 +312,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             {q.type === 'MULTIPLE_CHOICE' && q.options.map((opt:any) => (
               <label 
                 key={opt.id} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  padding: '1.25rem', 
-                  backgroundColor: selectedMultipleOptions.includes(opt.id) ? 'rgba(6, 182, 212, 0.08)' : 'var(--color-surface)', 
-                  border: `2px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'transparent'}`, 
-                  borderRadius: 'var(--radius-lg)', 
-                  cursor: 'pointer', 
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: selectedMultipleOptions.includes(opt.id) ? '0 4px 12px rgba(6, 182, 212, 0.15)' : '0 2px 4px rgba(0,0,0,0.02)'
-                }}
+                className={`question-option ${selectedMultipleOptions.includes(opt.id) ? "question-option-active" : ""}`}
               >
                 <div style={{ 
                   width: '24px', 
@@ -375,7 +348,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             disabled={isSubmitting || (q.type === 'SINGLE_CHOICE' && !selectedOptionId) || (q.type === 'MULTIPLE_CHOICE' && selectedMultipleOptions.length === 0) || (q.type === 'TEXT' && !textAnswer.trim())}
             style={{ width: '100%', padding: '1.25rem', fontSize: '1.125rem' }}
           >
-            {isSubmitting ? 'Guardando...' : 'Siguiente Misión'}
+            {isSubmitting ? 'Guardando...' : 'Siguiente'}
           </button>
         </div>
       </motion.div>

@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
-import { Work_Sans } from "next/font/google";
+import { Manrope, Sora } from "next/font/google";
 import "./globals.css";
 
-const workSans = Work_Sans({ subsets: ["latin"] });
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
 export const metadata: Metadata = {
   title: "Plataforma de Encuestas",
@@ -15,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className={workSans.className}>{children}</body>
+    <html lang="es" className={`${manrope.variable} ${sora.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

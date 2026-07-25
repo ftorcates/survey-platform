@@ -12,7 +12,7 @@ export default function DeleteSurveyButton({ surveyId }: { surveyId: string }) {
       setIsDeleting(true);
       try {
         await deleteSurvey(surveyId);
-      } catch (error) {
+      } catch {
         alert("Hubo un error al eliminar la encuesta.");
         setIsDeleting(false);
       }
@@ -23,12 +23,10 @@ export default function DeleteSurveyButton({ surveyId }: { surveyId: string }) {
     <button 
       onClick={handleDelete} 
       disabled={isDeleting}
-      className="btn-secondary" 
+      className="btn-secondary btn-danger" 
       style={{ 
-        flex: '0 0 auto', 
-        padding: '0.5rem', 
-        color: 'var(--color-error)',
-        borderColor: 'rgba(239, 68, 68, 0.2)'
+        flex: '0 0 auto',
+        padding: '0.65rem'
       }}
       title="Eliminar Encuesta"
     >
