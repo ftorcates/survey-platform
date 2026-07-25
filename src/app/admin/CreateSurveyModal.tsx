@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Type, List } from "lucide-react";
+import { Plus, X, Type, List, Image as ImageIcon, Trash2, ShieldAlert, ShieldCheck } from "lucide-react";
 import { createSurvey } from "./actions";
 
 export default function CreateSurveyModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"CUSTOM" | "FIXED_SCALE">("CUSTOM");
   const [options, setOptions] = useState<string[]>(["Nunca", "A veces", "Siempre"]);
+  const [isMandatory, setIsMandatory] = useState<boolean>(true);
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
 
   const handleAddOption = () => setOptions([...options, ""]);
   const handleOptionChange = (index: number, value: string) => {
@@ -19,6 +21,16 @@ export default function CreateSurveyModal() {
     setOptions(options.filter((_, i) => i !== index));
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageDataUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <>
       <button onClick={() => setIsOpen(true)} className="btn-primary">
@@ -27,7 +39,7 @@ export default function CreateSurveyModal() {
 
       {isOpen && (
         <div className="modal-backdrop">
-          <div className="modal-panel" style={{ maxWidth: "680px" }}>
+          <div className="modal-panel" style={{ maxWidth: "760px", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
                 <div className="eyebrow">Nueva encuesta</div>
@@ -45,22 +57,153 @@ export default function CreateSurveyModal() {
                   type="text" 
                   name="title" 
                   required 
-                  placeholder="Ej: Encuesta de Clima Laboral"
+                  placeholder="Ej: Encuesta de Clima Laboral 2026"
                   className="input-base"
                 />
               </div>
 
               <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Descripción (opcional)</label>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Imagen principal o banner (opcional)</label>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                  Añade una imagen que sirva de encabezado al iniciar el estudio.
+                </p>
+                <input type="hidden" name="image" value={imageDataUrl || ""} />
+                
+                {imageDataUrl ? (
+                  <div style={{ position: 'relative', display: 'inline-block', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-border)', maxWidth: '100%', maxHeight: '220px' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageDataUrl} alt="Preview" style={{ width: '100%', maxHeight: '220px', objectFit: 'cover', display: 'block' }} />
+                    <button 
+                      type="button" 
+                      onClick={() => setImageDataUrl(null)} 
+                      className="btn-danger"
+                      style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', padding: '0.4rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', borderRadius: 'var(--radius-md)' }}
+                    >
+                      <Trash2 size={14} /> Quitar imagen
+                    </button>
+                  </div>
+                ) : (
+                  <label 
+                    style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      padding: '2rem 1.5rem', 
+                      border: '2px dashed var(--color-border)', 
+                      borderRadius: 'var(--radius-lg)', 
+                      cursor: 'pointer',
+                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)')}
+                  >
+                    <ImageIcon size={28} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
+                    <span style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: '0.95rem' }}>Haz clic aquí para seleccionar una imagen</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '0.2rem' }}>PNG, JPG o WEBP</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageUpload} 
+                      style={{ display: 'none' }} 
+                    />
+                  </label>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Organización (opcional)</label>
+                  <input 
+                    type="text" 
+                    name="organization" 
+                    placeholder="Ej: Empresa S.A."
+                    className="input-base"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Departamento (opcional)</label>
+                  <input 
+                    type="text" 
+                    name="department" 
+                    placeholder="Ej: Recursos Humanos"
+                    className="input-base"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Sub-departamento (opcional)</label>
+                  <input 
+                    type="text" 
+                    name="subdepartment" 
+                    placeholder="Ej: Formación y Desarrollo"
+                    className="input-base"
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Instrucciones y descripción general</label>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+                  Proporciónale a los encuestados el contexto, objetivo o pasos a seguir para responder la encuesta.
+                </p>
                 <textarea 
                   name="description" 
-                  rows={3}
-                  placeholder="Instrucciones breves para quien responde..."
+                  rows={4}
+                  placeholder="Escribe aquí las instrucciones completas que leerá el participante antes de responder..."
                   className="input-base"
+                  style={{ minHeight: '100px' }}
                 />
               </div>
 
-              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Carácter de la participación</label>
+                <input type="hidden" name="isMandatory" value={isMandatory ? "true" : "false"} />
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div 
+                    onClick={() => setIsMandatory(true)}
+                    style={{ 
+                      padding: '0.85rem 1rem', 
+                      borderRadius: 'var(--radius-lg)', 
+                      border: `2px solid ${isMandatory ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                      cursor: 'pointer',
+                      backgroundColor: isMandatory ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem'
+                    }}
+                  >
+                    <ShieldAlert size={20} style={{ color: isMandatory ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
+                    <div>
+                      <strong style={{ display: 'block', color: isMandatory ? 'var(--color-primary)' : 'inherit', fontSize: '0.95rem' }}>Obligatorio</strong>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Requiere cumplimiento obligatorio</span>
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => setIsMandatory(false)}
+                    style={{ 
+                      padding: '0.85rem 1rem', 
+                      borderRadius: 'var(--radius-lg)', 
+                      border: `2px solid ${!isMandatory ? 'var(--color-primary)' : 'var(--color-border)'}`,
+                      cursor: 'pointer',
+                      backgroundColor: !isMandatory ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem'
+                    }}
+                  >
+                    <ShieldCheck size={20} style={{ color: !isMandatory ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
+                    <div>
+                      <strong style={{ display: 'block', color: !isMandatory ? 'var(--color-primary)' : 'inherit', fontSize: '0.95rem' }}>Voluntario</strong>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>La participación es opcional</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', backgroundColor: 'rgba(255,255,255,0.025)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                 <input 
                   type="checkbox" 
                   name="requireDemographics" 
@@ -68,7 +211,7 @@ export default function CreateSurveyModal() {
                   defaultChecked
                   style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
                 />
-                <label htmlFor="requireDemographics" style={{ fontWeight: 500, cursor: 'pointer', color: 'var(--color-text-main)' }}>
+                <label htmlFor="requireDemographics" style={{ fontWeight: 500, cursor: 'pointer', color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
                   Solicitar información demográfica de los participantes (edad y género)
                 </label>
               </div>
@@ -116,7 +259,20 @@ export default function CreateSurveyModal() {
               </div>
 
               {type === "FIXED_SCALE" && (
-                <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-lg)', border: "1px solid var(--color-border)" }}>
+                <div style={{ marginBottom: '1.5rem', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-lg)', border: "1px solid var(--color-border)" }}>
+                  <div style={{ marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <input 
+                      type="checkbox" 
+                      name="includeLikertTable" 
+                      id="includeLikertTable" 
+                      defaultChecked={false}
+                      style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="includeLikertTable" style={{ fontWeight: 500, cursor: 'pointer', color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
+                      Incluir una tabla inicial de referencia con las opciones de respuesta
+                    </label>
+                  </div>
+
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Opciones Globales Compartidas</label>
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Estas opciones se mostrarán para todas las preguntas de la encuesta.</p>
                   
@@ -147,7 +303,7 @@ export default function CreateSurveyModal() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', paddingBottom: '0.5rem' }}>
                 <button type="button" onClick={() => setIsOpen(false)} className="btn-secondary">Cancelar</button>
                 <button type="submit" className="btn-primary">Crear Encuesta</button>
               </div>
