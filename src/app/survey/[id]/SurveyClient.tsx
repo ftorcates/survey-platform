@@ -246,15 +246,16 @@ export default function SurveyClient({ survey }: { survey: any }) {
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ background: 'rgba(255, 255, 255, 0.04)', borderBottom: '1px solid var(--color-border)' }}>
-                      <th style={{ padding: '1rem 1.5rem', width: '25%', color: 'var(--color-text-muted)', fontWeight: 600, fontSize: '0.95rem' }}>Nivel / Puntuación</th>
-                      <th style={{ padding: '1rem 1.5rem', color: 'var(--color-text-main)', fontWeight: 600, fontSize: '0.95rem' }}>Opción de valoración (Escala)</th>
+                      <th style={{ padding: '1rem 1.5rem', color: 'var(--color-text-main)', fontWeight: 600, fontSize: '0.95rem' }}>Opciones disponibles en la escala</th>
                     </tr>
                   </thead>
                   <tbody>
                     {survey.options.map((opt: any, index: number) => (
                       <tr key={opt.id} style={{ borderBottom: index < survey.options.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
-                        <td style={{ padding: '1rem 1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{index + 1}</td>
-                        <td style={{ padding: '1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-main)', fontSize: '1.05rem' }}>{opt.text}</td>
+                        <td style={{ padding: '1.1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-main)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block', flexShrink: 0 }} />
+                          <span>{opt.text}</span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
