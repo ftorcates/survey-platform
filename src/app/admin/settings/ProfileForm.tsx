@@ -40,7 +40,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
             <img 
               src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random`} 
               alt="Profile" 
-              style={{ width: '80px', height: '80px', borderRadius: '24px', border: '4px solid rgba(255,255,255,0.85)', boxShadow: "var(--shadow-md)" }}
+              style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-strong)', boxShadow: "var(--shadow-md)" }}
             />
             <div>
               <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>{user.name}</p>
@@ -60,7 +60,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Email (No editable)</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.9rem 1rem', backgroundColor: 'rgba(255,255,255,0.62)', borderRadius: '1rem', color: 'var(--color-text-muted)', fontSize: '0.875rem', border: "1px solid var(--color-border)" }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.9rem 1rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-muted)', fontSize: '0.875rem', border: "1px solid var(--color-border)" }}>
               <Mail size={16} /> {user.email}
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
           Tu cuenta está protegida mediante autenticación social. No es necesario gestionar contraseñas locales.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', backgroundColor: 'rgba(15, 118, 110, 0.05)', borderRadius: '1rem', border: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', backgroundColor: 'rgba(159, 232, 112, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
           <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Autenticación verificada vía Google/GitHub</span>
         </div>

@@ -141,7 +141,7 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
                 {survey.type !== 'FIXED_SCALE' && q.type !== 'TEXT' && (
                   <div style={{ marginLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {q.options.map((opt: any) => (
-                      <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.9rem', backgroundColor: 'rgba(255,255,255,0.56)', borderRadius: '1rem', border: '1px solid var(--color-border)' }}>
+                      <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.9rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                         <div style={{ width: '16px', height: '16px', borderRadius: q.type === 'SINGLE_CHOICE' ? '50%' : '4px', border: '2px solid var(--color-primary)' }} />
                         <span style={{ flex: 1 }}>{opt.text}</span>
                         
@@ -177,7 +177,7 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
                 )}
 
                 {survey.type !== 'FIXED_SCALE' && q.type === 'TEXT' && (
-                  <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.56)', padding: '1rem', borderRadius: '1rem', border: '1px solid var(--color-border)' }}>
+                  <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.045)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                     <GitBranch size={16} color="var(--color-text-muted)" />
                     <span style={{ fontSize: '0.875rem' }}>Lógica de ramificación: </span>
                     <select 
@@ -234,7 +234,7 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
       </div>
 
       {/* Add Question Box */}
-      <div className="card" style={{ padding: '2rem', border: '2px dashed rgba(15, 118, 110, 0.24)', backgroundColor: 'rgba(255, 255, 255, 0.56)' }}>
+      <div className="card" style={{ padding: '2rem', border: '2px dashed rgba(159, 232, 112, 0.28)', backgroundColor: 'rgba(255, 255, 255, 0.045)' }}>
         <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 600 }}>Agregar Nueva Pregunta</h3>
         <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
           <input 

@@ -25,7 +25,7 @@ export default async function AudiencePage() {
 
       <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
         <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(15, 118, 110, 0.08)', borderRadius: '1rem' }}>
+          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(159, 232, 112, 0.1)', borderRadius: 'var(--radius-lg)' }}>
             <Users color="var(--color-primary)" size={24} />
           </div>
           <div>
@@ -34,7 +34,7 @@ export default async function AudiencePage() {
           </div>
         </div>
         <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(217, 119, 6, 0.12)', borderRadius: '1rem' }}>
+          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(255, 107, 87, 0.12)', borderRadius: 'var(--radius-lg)' }}>
             <BarChart3 color="var(--color-secondary)" size={24} />
           </div>
           <div>

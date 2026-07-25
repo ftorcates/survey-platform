@@ -28,17 +28,6 @@ export default function AdminSidebar({
           <div className="brand-title">Control Center</div>
         </div>
       </div>
-
-      <div style={{ marginBottom: "1.25rem", padding: "1rem", borderRadius: "1.2rem", background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.48)" }}>
-        <p className="menu-section-title">Espacio de trabajo</p>
-        <p style={{ color: "var(--color-text-main)", fontWeight: 700, marginBottom: "0.4rem" }}>
-          Gestiona encuestas y resultados
-        </p>
-        <p style={{ color: "var(--color-text-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
-          Un único lugar para publicar, compartir y revisar estudios.
-        </p>
-      </div>
-
       <nav className="nav-list" aria-label="Navegación principal">
         {links.map(({ href, label, icon: Icon }) => {
           const isActive =
@@ -48,6 +37,8 @@ export default function AdminSidebar({
             <Link
               key={href}
               href={href}
+              aria-label={label}
+              title={label}
               className={`nav-link ${isActive ? "nav-link-active" : ""}`}
             >
               <Icon size={18} />
@@ -60,7 +51,7 @@ export default function AdminSidebar({
       <div className="sidebar-footer">
         <div className="divider" style={{ marginBottom: "1rem" }} />
         <form action={signOutAction}>
-          <button className="nav-link" style={{ width: "100%", background: "none" }}>
+          <button className="nav-link" aria-label="Cerrar sesión" title="Cerrar sesión" style={{ width: "100%", background: "none" }}>
             <LogOut size={18} />
             Cerrar sesión
           </button>

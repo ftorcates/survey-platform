@@ -81,10 +81,10 @@ export default function CreateSurveyModal() {
                     onClick={() => setType("CUSTOM")}
                     style={{ 
                       padding: '1rem', 
-                      borderRadius: '1rem', 
+                      borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${type === "CUSTOM" ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: type === "CUSTOM" ? 'rgba(15, 118, 110, 0.08)' : 'rgba(255,255,255,0.4)'
+                      backgroundColor: type === "CUSTOM" ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', color: type === "CUSTOM" ? 'var(--color-primary)' : 'inherit' }}>
@@ -98,10 +98,10 @@ export default function CreateSurveyModal() {
                     onClick={() => setType("FIXED_SCALE")}
                     style={{ 
                       padding: '1rem', 
-                      borderRadius: '1rem', 
+                      borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${type === "FIXED_SCALE" ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: type === "FIXED_SCALE" ? 'rgba(15, 118, 110, 0.08)' : 'rgba(255,255,255,0.4)'
+                      backgroundColor: type === "FIXED_SCALE" ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', color: type === "FIXED_SCALE" ? 'var(--color-primary)' : 'inherit' }}>
@@ -116,7 +116,7 @@ export default function CreateSurveyModal() {
               </div>
 
               {type === "FIXED_SCALE" && (
-                <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.58)', borderRadius: '1rem', border: "1px solid var(--color-border)" }}>
+                <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-lg)', border: "1px solid var(--color-border)" }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Opciones Globales Compartidas</label>
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Estas opciones se mostrarán para todas las preguntas de la encuesta.</p>
                   
@@ -139,7 +139,7 @@ export default function CreateSurveyModal() {
                     </div>
                   ))}
                   
-                  <button type="button" onClick={handleAddOption} style={{ marginTop: '0.5rem', background: 'none', border: '1px dashed var(--color-border)', color: 'var(--color-text-main)', padding: '0.75rem 1rem', borderRadius: '1rem', cursor: 'pointer', width: '100%', fontWeight: 700 }}>
+                  <button type="button" onClick={handleAddOption} style={{ marginTop: '0.5rem', background: 'none', border: '1px dashed var(--color-border)', color: 'var(--color-text-main)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%', fontWeight: 700 }}>
                     + Añadir Opción
                   </button>
 

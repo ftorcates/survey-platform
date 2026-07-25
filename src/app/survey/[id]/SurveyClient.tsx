@@ -110,7 +110,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
   if (currentStep === -2) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.8, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="card" style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '4px solid var(--color-success)' }}>
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-success), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
           Respuesta registrada
         </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.125rem' }}>Tus respuestas han sido registradas exitosamente y de forma anónima. ¡Gracias por tu tiempo!</p>
@@ -203,7 +203,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                           alignItems: 'center',
                           justifyContent: 'center',
                           transition: 'all 0.2s',
-                          backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(15, 118, 110, 0.1)' : 'transparent'
+                          backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.1)' : 'transparent'
                         }}>
                           {matrixAnswers[q.id] === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
                         </div>
