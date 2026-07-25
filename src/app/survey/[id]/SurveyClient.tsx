@@ -5,8 +5,11 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { startSurveyResponse, saveAnswer } from "./actions"
 
+type StepState = 'PRESENTATION' | 'INSTRUCTIONS' | 'DEMOGRAPHICS' | 'QUESTIONS' | 'FINISHED';
+
 export default function SurveyClient({ survey }: { survey: any }) {
-  const [currentStep, setCurrentStep] = useState(-1); // -1: demographics, 0+: question index (or matrix), -2: finished
+  const [step, setStep] = useState<StepState>('PRESENTATION');
+  const [currentStep, setCurrentStep] = useState(0); // Question index in dynamic flow
   const [responseId, setResponseId] = useState<string | null>(null);
 
   // Demographics state
@@ -29,10 +32,11 @@ export default function SurveyClient({ survey }: { survey: any }) {
     setResponseId(rid);
     setIsSubmitting(false);
     
-    if (survey.questions.length > 0) {
+    if (survey.questions && survey.questions.length > 0) {
+      setStep('QUESTIONS');
       setCurrentStep(0);
     } else {
-      setCurrentStep(-2); // Finish if no questions
+      setStep('FINISHED');
     }
   };
 
@@ -67,7 +71,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
     // Branching: Find the next question index if a specific nextQuestionId is set
     if (nextQId === 'END') {
-      setCurrentStep(-2); // End immediately
+      setStep('FINISHED');
       return;
     }
 
@@ -83,7 +87,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
     if (currentStep + 1 < survey.questions.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      setCurrentStep(-2); // End of survey
+      setStep('FINISHED');
     }
   };
 
@@ -96,7 +100,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       }
     }
     setIsSubmitting(false);
-    setCurrentStep(-2); // End of survey
+    setStep('FINISHED');
   };
 
   const toggleMultipleOption = (id: string) => {
@@ -107,251 +111,469 @@ export default function SurveyClient({ survey }: { survey: any }) {
     }
   };
 
-  if (currentStep === -2) {
+  // --- 1. PRESENTATION SCREEN (PORTADA DE TRABAJO) ---
+  if (step === 'PRESENTATION') {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.8, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.5 }} className="card" style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '4px solid var(--color-success)' }}>
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
-          Respuesta registrada
-        </h2>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.125rem' }}>Tus respuestas han sido registradas exitosamente y de forma anónima. ¡Gracias por tu tiempo!</p>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.98, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="card" 
+        style={{ 
+          padding: '5rem 3rem', 
+          textAlign: 'center', 
+          minHeight: '620px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          background: 'linear-gradient(145deg, var(--color-surface), rgba(15, 20, 25, 0.9))',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.35)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          position: 'relative',
+          overflow: 'hidden',
+          width: '100%',
+          maxWidth: '850px',
+          margin: '0 auto'
+        }}
+      >
+        {/* Subtle radial light highlight in background */}
+        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(159, 232, 112, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+        {/* Top Section: Logo and Hierarchy (Centrados) */}
+        <div style={{ width: '100%', maxWidth: '650px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.75rem' }}>
+          {survey.image && (
+            <div style={{ marginBottom: '0.5rem' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={survey.image} 
+                alt="Logo de la Empresa" 
+                style={{ maxHeight: '140px', maxWidth: '300px', objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.3))' }} 
+              />
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center', width: '100%' }}>
+            {survey.organization && (
+              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--color-text-main)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                {survey.organization}
+              </div>
+            )}
+            {survey.department && (
+              <div style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+                {survey.department}
+              </div>
+            )}
+            {survey.subdepartment && (
+              <div style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                {survey.subdepartment}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Center Section: Título de la encuesta (Centrado) */}
+        <div style={{ margin: '3.5rem 0', width: '100%' }}>
+          <div style={{ display: 'inline-block', padding: '0.4rem 1.2rem', borderRadius: '50px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--color-border)', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '0.825rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
+              {survey.isMandatory ? '● Estudio de Participación Obligatoria' : '○ Estudio de Participación Voluntaria'}
+            </span>
+          </div>
+          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.2rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--color-text-main)', letterSpacing: '-0.02em', maxWidth: '750px', margin: '0 auto' }}>
+            {survey.title}
+          </h1>
+        </div>
+
+        {/* Bottom Section: Botón Ver Instrucciones */}
+        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', width: '100%' }}>
+          <button 
+            type="button"
+            onClick={() => setStep('INSTRUCTIONS')} 
+            className="btn-primary" 
+            style={{ 
+              padding: '1.25rem 3.2rem', 
+              fontSize: '1.15rem', 
+              fontWeight: 700, 
+              borderRadius: '50px', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '0.85rem',
+              boxShadow: '0 10px 35px rgba(159, 232, 112, 0.25)',
+              cursor: 'pointer'
+            }}
+          >
+            <span>Ver Instrucciones</span>
+            <span style={{ fontSize: '1.35rem', lineHeight: 1 }}>→</span>
+          </button>
+        </div>
       </motion.div>
     );
   }
 
-  if (currentStep === -1) {
+  // --- 2. INSTRUCTIONS SCREEN ---
+  if (step === 'INSTRUCTIONS') {
     return (
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2.5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span className="eyebrow">Antes de comenzar</span>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>
-            {survey.requireDemographics ? 'Conociéndote un poco' : '¡Bienvenido!'}
+      <motion.div 
+        initial={{ opacity: 0, x: 40 }} 
+        animate={{ opacity: 1, x: 0 }} 
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        className="card" 
+        style={{ padding: '4rem 3.5rem', minHeight: '520px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', maxWidth: '800px', margin: '0 auto', width: '100%' }}
+      >
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <span className="eyebrow">Instrucciones generales</span>
+          </div>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 700, color: 'var(--color-text-main)', marginBottom: '2.5rem', letterSpacing: '-0.01em' }}>
+            Antes de comenzar
           </h2>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>
-            {survey.requireDemographics 
-              ? 'Esta experiencia es 100% anónima. Tus datos nos ayudan a mejorar nuestras métricas.'
-              : 'Estás a punto de comenzar la encuesta. Tus respuestas son completamente anónimas.'}
+          {survey.description ? (
+            <div style={{ fontSize: '1.15rem', lineHeight: 1.75, color: 'var(--color-text-muted)', whiteSpace: 'pre-wrap', background: 'rgba(255,255,255,0.02)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+              {survey.description}
+            </div>
+          ) : (
+            <div style={{ fontSize: '1.15rem', color: 'var(--color-text-muted)', lineHeight: 1.75, background: 'rgba(255,255,255,0.02)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+              Por favor responde a todas las preguntas con atención y sinceridad. Tu opinión es el pilar para nuestras mejoras continuas y toda la información suministrada se procesa de forma completamente confidencial.
+            </div>
+          )}
+
+          {survey.type === 'FIXED_SCALE' && survey.includeLikertTable && survey.options && survey.options.length > 0 && (
+            <div style={{ marginTop: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '1.25rem' }}>
+                Escala y opciones de valoración aplicables:
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
+                {survey.options.map((opt: any, index: number) => (
+                  <div key={opt.id} style={{ background: 'rgba(159, 232, 112, 0.08)', border: '1px solid rgba(159, 232, 112, 0.3)', padding: '0.65rem 1.4rem', borderRadius: '30px', fontSize: '1rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+                    {index + 1}. {opt.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', paddingTop: '1.75rem', borderTop: '1px solid var(--color-border)' }}>
+          <button 
+            type="button" 
+            onClick={() => setStep('PRESENTATION')} 
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '1.05rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            ← Volver a Portada
+          </button>
+          <button 
+            type="button"
+            onClick={() => {
+              if (survey.requireDemographics) {
+                setStep('DEMOGRAPHICS');
+              } else {
+                handleStart();
+              }
+            }} 
+            disabled={isSubmitting}
+            className="btn-primary" 
+            style={{ padding: '1.2rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '50px', cursor: 'pointer', boxShadow: '0 10px 30px rgba(159, 232, 112, 0.2)' }}
+          >
+            {isSubmitting ? 'Iniciando...' : 'Comenzar'}
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // --- 3. DEMOGRAPHICS SCREEN (ONLY IF REQUIRED) ---
+  if (step === 'DEMOGRAPHICS') {
+    return (
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '3.5rem 3rem', maxWidth: '650px', margin: '0 auto', width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <span className="eyebrow">Datos Demográficos</span>
+          <h2 style={{ fontSize: '2rem', fontWeight: 700, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>
+            Conociéndote un poco
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.75rem', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            Esta experiencia es 100% anónima. Tus datos nos ayudan a segmentar y mejorar las métricas analíticas.
           </p>
         </div>
         
-        {survey.requireDemographics && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué rango de edad te encuentras?</label>
-              <select className="input-base" style={{ padding: '1rem' }} value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
-                <option value="">Selecciona una opción...</option>
-                <option value="18-24">18 - 24 años</option>
-                <option value="25-34">25 - 34 años</option>
-                <option value="35-44">35 - 44 años</option>
-                <option value="45-54">45 - 54 años</option>
-                <option value="55+">55+ años</option>
-                <option value="none">Prefiero no decirlo</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Con qué género te identificas?</label>
-              <select className="input-base" style={{ padding: '1rem' }} value={sex} onChange={e => setSex(e.target.value)}>
-                <option value="">Selecciona una opción...</option>
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-                <option value="Other">Otro</option>
-                <option value="none">Prefiero no decirlo</option>
-              </select>
-            </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', marginBottom: '3rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué rango de edad te encuentras?</label>
+            <select className="input-base" style={{ padding: '1rem', fontSize: '1.05rem' }} value={ageGroup} onChange={e => setAgeGroup(e.target.value)}>
+              <option value="">Selecciona una opción...</option>
+              <option value="18-24">18 - 24 años</option>
+              <option value="25-34">25 - 34 años</option>
+              <option value="35-44">35 - 44 años</option>
+              <option value="45-54">45 - 54 años</option>
+              <option value="55+">55+ años</option>
+              <option value="none">Prefiero no decirlo</option>
+            </select>
           </div>
-        )}
-        <button className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} onClick={handleStart} disabled={isSubmitting}>
-          {isSubmitting ? 'Cargando...' : 'Comenzar encuesta'}
-        </button>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Con qué género te identificas?</label>
+            <select className="input-base" style={{ padding: '1rem', fontSize: '1.05rem' }} value={sex} onChange={e => setSex(e.target.value)}>
+              <option value="">Selecciona una opción...</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="Other">Otro</option>
+              <option value="none">Prefiero no decirlo</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button 
+            type="button" 
+            onClick={() => setStep('INSTRUCTIONS')} 
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            ← Instrucciones
+          </button>
+          <button 
+            type="button"
+            className="btn-primary" 
+            style={{ padding: '1.1rem 2.8rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }} 
+            onClick={handleStart} 
+            disabled={isSubmitting || !ageGroup || !sex}
+          >
+            {isSubmitting ? 'Iniciando...' : 'Ir a las Preguntas →'}
+          </button>
+        </div>
       </motion.div>
     );
   }
 
-  // --- FIXED SCALE (MATRIX) FLOW ---
-  if (survey.type === 'FIXED_SCALE' && currentStep === 0) {
+  // --- 5. FINISHED SCREEN (AGRADECIMIENTO) ---
+  if (step === 'FINISHED') {
     return (
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <span className="eyebrow">Escala completa</span>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>Por favor evalúa las siguientes afirmaciones</h2>
+      <motion.div initial={{ opacity: 0, scale: 0.9, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.4 }} className="card" style={{ padding: '5rem 2.5rem', textAlign: 'center', borderTop: '5px solid var(--color-success)', maxWidth: '680px', margin: '0 auto' }}>
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(159, 232, 112, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto', border: '2px solid var(--color-success)' }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
         </div>
+        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
+          ¡Muchas Gracias!
+        </h2>
+        <p style={{ color: 'var(--color-text-main)', fontSize: '1.3rem', fontWeight: 600, marginBottom: '1rem' }}>
+          Tus respuestas han sido registradas exitosamente.
+        </p>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.08rem', lineHeight: 1.65, maxWidth: '520px', margin: '0 auto' }}>
+          Agradecemos sinceramente el tiempo dedicado en completar este estudio. Toda la información ha sido almacenada de forma segura y confidencial. Ya puedes cerrar esta ventana.
+        </p>
+      </motion.div>
+    );
+  }
 
-        <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '600px' }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid var(--color-border)', width: '35%' }}>Afirmación</th>
-                {survey.options.map((opt: any) => (
-                  <th key={opt.id} style={{ padding: '1rem', borderBottom: '2px solid var(--color-border)', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.875rem', width: `${65 / survey.options.length}%` }}>
-                    {opt.text}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {survey.questions.map((q: any) => (
-                <tr key={q.id} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: matrixAnswers[q.id] ? 'transparent' : 'rgba(239, 68, 68, 0.02)' }}>
-                  <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem' }}>{q.text}</td>
+  // --- 4. QUESTIONS SCREEN (FIXED SCALE OR DYNAMIC FLOW) ---
+  return (
+    <div style={{ width: '100%', position: 'relative' }}>
+      <header style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "1.5rem", alignItems: "end", marginBottom: "2rem" }}>
+        <div>
+          <div className="eyebrow" style={{ marginBottom: "0.6rem" }}>Encuesta en progreso</div>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 1.05, fontWeight: 800, color: 'var(--color-text-main)', letterSpacing: '-0.01em' }}>
+            {survey.title}
+          </h1>
+        </div>
+        <div className="card stat-card" style={{ minWidth: "120px", padding: '0.75rem 1.25rem', textAlign: 'center', background: 'var(--color-surface)' }}>
+          <div className="stat-label" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Preguntas</div>
+          <div className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{survey.questions ? survey.questions.length : 0}</div>
+        </div>
+      </header>
+
+      {/* FIXED SCALE (MATRIX) FLOW */}
+      {survey.type === 'FIXED_SCALE' ? (
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ padding: '2.5rem', width: '100%' }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <span className="eyebrow">Escala completa</span>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>Por favor evalúa las siguientes afirmaciones</h2>
+          </div>
+
+          <div style={{ overflowX: 'auto', marginBottom: '2.5rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '600px' }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid var(--color-border)', width: '35%' }}>Afirmación</th>
                   {survey.options.map((opt: any) => (
-                    <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
-                      <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
-                        <div style={{
-                          width: '24px', 
-                          height: '24px', 
-                          borderRadius: '50%', 
-                          border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.2s',
-                          backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.1)' : 'transparent'
-                        }}>
-                          {matrixAnswers[q.id] === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
-                        </div>
-                        <input 
-                          type="radio" 
-                          name={`matrix-${q.id}`} 
-                          checked={matrixAnswers[q.id] === opt.id}
-                          onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
-                          style={{ display: 'none' }}
-                        />
-                      </label>
-                    </td>
+                    <th key={opt.id} style={{ padding: '1rem', borderBottom: '2px solid var(--color-border)', fontWeight: 600, color: 'var(--color-text-muted)', fontSize: '0.875rem', width: `${65 / survey.options.length}%` }}>
+                      {opt.text}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <button 
-          className="btn-primary" 
-          onClick={handleSubmitMatrix}
-          disabled={isSubmitting}
-          style={{ width: '100%', padding: '1.25rem', fontSize: '1.125rem', opacity: 1 }}
-        >
-            {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
-        </button>
-      </motion.div>
-    );
-  }
-
-  // --- DYNAMIC FLOW ---
-  const q = survey.questions[currentStep];
-  const progress = ((currentStep) / survey.questions.length) * 100;
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div 
-        key={q.id}
-        initial={{ opacity: 0, x: 100, scale: 0.95 }} 
-        animate={{ opacity: 1, x: 0, scale: 1 }} 
-        exit={{ opacity: 0, x: -100, scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="card" 
-        style={{ padding: '0', overflow: 'hidden' }}
-      >
-        {/* Progress Bar */}
-        <div className="progress-track" style={{ borderRadius: 0 }}>
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            style={{ height: '100%', background: 'linear-gradient(90deg, var(--color-primary), var(--color-cta))' }}
-          />
-        </div>
-
-        <div style={{ padding: '3rem 2.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <span className="eyebrow">
-              Pregunta {currentStep + 1} de {survey.questions.length}
-            </span>
-          </div>
-          
-          <h2 style={{ fontSize: '1.75rem', marginBottom: '2.5rem', fontWeight: 600, lineHeight: 1.4, color: 'var(--color-text-main)' }}>{q.text}</h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3rem' }}>
-            {q.type === 'TEXT' && (
-              <textarea 
-                className="input-base" 
-                rows={5} 
-                style={{ fontSize: '1.125rem', resize: 'vertical' }}
-                placeholder="Escribe tu respuesta aquí..."
-                value={textAnswer}
-                onChange={e => setTextAnswer(e.target.value)}
-              />
-            )}
-
-            {q.type === 'SINGLE_CHOICE' && q.options.map((opt:any) => (
-              <label 
-                key={opt.id} 
-                className={`question-option ${selectedOptionId === opt.id ? "question-option-active" : ""}`}
-              >
-                <div style={{ 
-                  width: '24px', 
-                  height: '24px', 
-                  borderRadius: '50%', 
-                  border: `2px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s'
-                }}>
-                  {selectedOptionId === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
-                </div>
-                <input 
-                  type="radio" 
-                  name={`q-${q.id}`} 
-                  checked={selectedOptionId === opt.id}
-                  onChange={() => setSelectedOptionId(opt.id)}
-                  style={{ display: 'none' }}
-                />
-                <span style={{ fontSize: '1.125rem', fontWeight: selectedOptionId === opt.id ? 600 : 400 }}>{opt.text}</span>
-              </label>
-            ))}
-
-            {q.type === 'MULTIPLE_CHOICE' && q.options.map((opt:any) => (
-              <label 
-                key={opt.id} 
-                className={`question-option ${selectedMultipleOptions.includes(opt.id) ? "question-option-active" : ""}`}
-              >
-                <div style={{ 
-                  width: '24px', 
-                  height: '24px', 
-                  borderRadius: '6px', 
-                  border: `2px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-text-muted)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s',
-                  backgroundColor: selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'transparent'
-                }}>
-                  {selectedMultipleOptions.includes(opt.id) && (
-                    <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  )}
-                </div>
-                <input 
-                  type="checkbox" 
-                  checked={selectedMultipleOptions.includes(opt.id)}
-                  onChange={() => toggleMultipleOption(opt.id)}
-                  style={{ display: 'none' }}
-                />
-                <span style={{ fontSize: '1.125rem', fontWeight: selectedMultipleOptions.includes(opt.id) ? 600 : 400 }}>{opt.text}</span>
-              </label>
-            ))}
+              </thead>
+              <tbody>
+                {survey.questions.map((q: any) => (
+                  <tr key={q.id} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: matrixAnswers[q.id] ? 'transparent' : 'rgba(239, 68, 68, 0.02)' }}>
+                    <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>{q.text}</td>
+                    {survey.options.map((opt: any) => (
+                      <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
+                        <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
+                          <div style={{
+                            width: '26px', 
+                            height: '26px', 
+                            borderRadius: '50%', 
+                            border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                            backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.15)' : 'transparent'
+                          }}>
+                            {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
+                          </div>
+                          <input 
+                            type="radio" 
+                            name={`matrix-${q.id}`} 
+                            checked={matrixAnswers[q.id] === opt.id}
+                            onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                            style={{ display: 'none' }}
+                          />
+                        </label>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <button 
             className="btn-primary" 
-            onClick={handleNextQuestion}
-            disabled={isSubmitting || (q.type === 'SINGLE_CHOICE' && !selectedOptionId) || (q.type === 'MULTIPLE_CHOICE' && selectedMultipleOptions.length === 0) || (q.type === 'TEXT' && !textAnswer.trim())}
-            style={{ width: '100%', padding: '1.25rem', fontSize: '1.125rem' }}
+            onClick={handleSubmitMatrix}
+            disabled={isSubmitting || Object.keys(matrixAnswers).length < survey.questions.length}
+            style={{ width: '100%', padding: '1.25rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
           >
-            {isSubmitting ? 'Guardando...' : 'Siguiente'}
+              {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
           </button>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+        </motion.div>
+      ) : (
+        /* DYNAMIC FLOW */
+        (() => {
+          const q = survey.questions[currentStep];
+          if (!q) return null;
+          const progress = ((currentStep) / survey.questions.length) * 100;
+
+          return (
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={q.id}
+                initial={{ opacity: 0, x: 80, scale: 0.98 }} 
+                animate={{ opacity: 1, x: 0, scale: 1 }} 
+                exit={{ opacity: 0, x: -80, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                className="card" 
+                style={{ padding: '0', overflow: 'hidden' }}
+              >
+                {/* Progress Bar */}
+                <div className="progress-track" style={{ borderRadius: 0, height: '6px', background: 'rgba(255,255,255,0.05)' }}>
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    style={{ height: '100%', background: 'linear-gradient(90deg, var(--color-primary), var(--color-cta))' }}
+                  />
+                </div>
+
+                <div style={{ padding: '3.5rem 3rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <span className="eyebrow" style={{ color: 'var(--color-text-muted)' }}>
+                      Pregunta {currentStep + 1} de {survey.questions.length}
+                    </span>
+                  </div>
+                  
+                  <h2 style={{ fontSize: '1.85rem', marginBottom: '2.5rem', fontWeight: 600, lineHeight: 1.4, color: 'var(--color-text-main)' }}>{q.text}</h2>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3.5rem' }}>
+                    {q.type === 'TEXT' && (
+                      <textarea 
+                        className="input-base" 
+                        rows={6} 
+                        style={{ fontSize: '1.125rem', resize: 'vertical', padding: '1.25rem' }}
+                        placeholder="Escribe tu respuesta con el mayor detalle posible..."
+                        value={textAnswer}
+                        onChange={e => setTextAnswer(e.target.value)}
+                      />
+                    )}
+
+                    {q.type === 'SINGLE_CHOICE' && q.options && q.options.map((opt:any) => (
+                      <label 
+                        key={opt.id} 
+                        className={`question-option ${selectedOptionId === opt.id ? "question-option-active" : ""}`}
+                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedOptionId === opt.id ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-border)'}` }}
+                      >
+                        <div style={{ 
+                          width: '24px', 
+                          height: '24px', 
+                          borderRadius: '50%', 
+                          border: `2px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s',
+                          flexShrink: 0
+                        }}>
+                          {selectedOptionId === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
+                        </div>
+                        <input 
+                          type="radio" 
+                          name={`q-${q.id}`} 
+                          checked={selectedOptionId === opt.id}
+                          onChange={() => setSelectedOptionId(opt.id)}
+                          style={{ display: 'none' }}
+                        />
+                        <span style={{ fontSize: '1.15rem', fontWeight: selectedOptionId === opt.id ? 600 : 400, color: 'var(--color-text-main)' }}>{opt.text}</span>
+                      </label>
+                    ))}
+
+                    {q.type === 'MULTIPLE_CHOICE' && q.options && q.options.map((opt:any) => (
+                      <label 
+                        key={opt.id} 
+                        className={`question-option ${selectedMultipleOptions.includes(opt.id) ? "question-option-active" : ""}`}
+                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedMultipleOptions.includes(opt.id) ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-border)'}` }}
+                      >
+                        <div style={{ 
+                          width: '24px', 
+                          height: '24px', 
+                          borderRadius: '6px', 
+                          border: `2px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-text-muted)'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s',
+                          backgroundColor: selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'transparent',
+                          flexShrink: 0
+                        }}>
+                          {selectedMultipleOptions.includes(opt.id) && (
+                            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedMultipleOptions.includes(opt.id)}
+                          onChange={() => toggleMultipleOption(opt.id)}
+                          style={{ display: 'none' }}
+                        />
+                        <span style={{ fontSize: '1.15rem', fontWeight: selectedMultipleOptions.includes(opt.id) ? 600 : 400, color: 'var(--color-text-main)' }}>{opt.text}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <button 
+                    className="btn-primary" 
+                    onClick={handleNextQuestion}
+                    disabled={isSubmitting || (q.type === 'SINGLE_CHOICE' && !selectedOptionId) || (q.type === 'MULTIPLE_CHOICE' && selectedMultipleOptions.length === 0) || (q.type === 'TEXT' && !textAnswer.trim())}
+                    style={{ width: '100%', padding: '1.25rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
+                  >
+                    {isSubmitting ? 'Guardando...' : (currentStep + 1 === survey.questions.length && !q.nextQuestionId) ? 'Finalizar' : 'Siguiente →'}
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          );
+        })()
+      )}
+    </div>
   );
 }
+
