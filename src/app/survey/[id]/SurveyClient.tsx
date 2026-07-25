@@ -15,12 +15,12 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // Demographics state
   const [ageGroup, setAgeGroup] = useState("");
   const [sex, setSex] = useState("");
-  
+
   // Current answer state (Dynamic flow)
   const [textAnswer, setTextAnswer] = useState("");
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [selectedMultipleOptions, setSelectedMultipleOptions] = useState<string[]>([]);
-  
+
   // Matrix answer state (Fixed Scale flow)
   const [matrixAnswers, setMatrixAnswers] = useState<Record<string, string>>({});
 
@@ -31,7 +31,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
     const rid = await startSurveyResponse(survey.id, { ageGroup, sex });
     setResponseId(rid);
     setIsSubmitting(false);
-    
+
     if (survey.questions && survey.questions.length > 0) {
       setStep('QUESTIONS');
       setCurrentStep(0);
@@ -42,7 +42,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
   const handleNextQuestion = async () => {
     if (!responseId) return;
-    
+
     const currentQ = survey.questions[currentStep];
     let nextQId = currentQ.nextQuestionId;
 
@@ -52,7 +52,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       await saveAnswer(responseId, currentQ.id, textAnswer, undefined);
     } else if (currentQ.type === 'SINGLE_CHOICE') {
       await saveAnswer(responseId, currentQ.id, undefined, selectedOptionId || undefined);
-      const selectedOpt = currentQ.options.find((o:any) => o.id === selectedOptionId);
+      const selectedOpt = currentQ.options.find((o: any) => o.id === selectedOptionId);
       if (selectedOpt && selectedOpt.nextQuestionId) {
         nextQId = selectedOpt.nextQuestionId; // Branching logic overrides question sequence!
       }
@@ -76,13 +76,13 @@ export default function SurveyClient({ survey }: { survey: any }) {
     }
 
     if (nextQId) {
-      const nextIndex = survey.questions.findIndex((q:any) => q.id === nextQId);
+      const nextIndex = survey.questions.findIndex((q: any) => q.id === nextQId);
       if (nextIndex !== -1) {
         setCurrentStep(nextIndex);
         return;
       }
     }
-    
+
     // Default flow: go to the next question in the array
     if (currentStep + 1 < survey.questions.length) {
       setCurrentStep(currentStep + 1);
@@ -114,17 +114,17 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // --- 1. PRESENTATION SCREEN (PORTADA DE TRABAJO) ---
   if (step === 'PRESENTATION') {
     return (
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98, y: 20 }} 
-        animate={{ opacity: 1, scale: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="card" 
-        style={{ 
-          padding: '5rem 3rem', 
-          textAlign: 'center', 
-          minHeight: '620px', 
-          display: 'flex', 
-          flexDirection: 'column', 
+        className="card"
+        style={{
+          padding: '5rem 3rem',
+          textAlign: 'center',
+          minHeight: '620px',
+          display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'space-between',
           alignItems: 'center',
           background: 'linear-gradient(145deg, var(--color-surface), rgba(15, 20, 25, 0.9))',
@@ -145,10 +145,10 @@ export default function SurveyClient({ survey }: { survey: any }) {
           {survey.image && (
             <div style={{ marginBottom: '0.5rem' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={survey.image} 
-                alt="Logo de la Empresa" 
-                style={{ maxHeight: '140px', maxWidth: '300px', objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.3))' }} 
+              <img
+                src={survey.image}
+                alt="Logo de la Empresa"
+                style={{ maxHeight: '140px', maxWidth: '300px', objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.3))' }}
               />
             </div>
           )}
@@ -174,11 +174,6 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
         {/* Center Section: Título de la encuesta (Centrado) */}
         <div style={{ margin: '3.5rem 0', width: '100%' }}>
-          <div style={{ display: 'inline-block', padding: '0.4rem 1.2rem', borderRadius: '50px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--color-border)', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '0.825rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
-              {survey.isMandatory ? '● Estudio de Participación Obligatoria' : '○ Estudio de Participación Voluntaria'}
-            </span>
-          </div>
           <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.2rem)', fontWeight: 800, lineHeight: 1.15, color: 'var(--color-text-main)', letterSpacing: '-0.02em', maxWidth: '750px', margin: '0 auto' }}>
             {survey.title}
           </h1>
@@ -186,17 +181,17 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
         {/* Bottom Section: Botón Ver Instrucciones */}
         <div style={{ marginTop: 'auto', paddingTop: '1.5rem', width: '100%' }}>
-          <button 
+          <button
             type="button"
-            onClick={() => setStep('INSTRUCTIONS')} 
-            className="btn-primary" 
-            style={{ 
-              padding: '1.25rem 3.2rem', 
-              fontSize: '1.15rem', 
-              fontWeight: 700, 
-              borderRadius: '50px', 
-              display: 'inline-flex', 
-              alignItems: 'center', 
+            onClick={() => setStep('INSTRUCTIONS')}
+            className="btn-primary"
+            style={{
+              padding: '1.25rem 3.2rem',
+              fontSize: '1.15rem',
+              fontWeight: 700,
+              borderRadius: '50px',
+              display: 'inline-flex',
+              alignItems: 'center',
               gap: '0.85rem',
               boxShadow: '0 10px 35px rgba(159, 232, 112, 0.25)',
               cursor: 'pointer'
@@ -213,11 +208,11 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // --- 2. INSTRUCTIONS SCREEN ---
   if (step === 'INSTRUCTIONS') {
     return (
-      <motion.div 
-        initial={{ opacity: 0, x: 40 }} 
-        animate={{ opacity: 1, x: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="card" 
+        className="card"
         style={{ padding: '4rem 3.5rem', minHeight: '520px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', maxWidth: '800px', margin: '0 auto', width: '100%' }}
       >
         <div>
@@ -240,28 +235,60 @@ export default function SurveyClient({ survey }: { survey: any }) {
           {survey.type === 'FIXED_SCALE' && survey.includeLikertTable && survey.options && survey.options.length > 0 && (
             <div style={{ marginTop: '2.5rem' }}>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '1.25rem' }}>
-                Escala y opciones de valoración aplicables:
+                Tabla de opciones de respuesta:
               </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem' }}>
-                {survey.options.map((opt: any, index: number) => (
-                  <div key={opt.id} style={{ background: 'rgba(159, 232, 112, 0.08)', border: '1px solid rgba(159, 232, 112, 0.3)', padding: '0.65rem 1.4rem', borderRadius: '30px', fontSize: '1rem', fontWeight: 600, color: 'var(--color-primary)' }}>
-                    {index + 1}. {opt.text}
-                  </div>
-                ))}
+              <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(255, 255, 255, 0.04)', borderBottom: '1px solid var(--color-border)' }}>
+                      <th style={{ padding: '1rem 1.5rem', color: 'var(--color-text-main)', fontWeight: 600, fontSize: '0.95rem' }}>Opciones disponibles en la escala</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {survey.options.map((opt: any, index: number) => (
+                      <tr key={opt.id} style={{ borderBottom: index < survey.options.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+                        <td style={{ padding: '1.1rem 1.5rem', fontWeight: 500, color: 'var(--color-text-main)', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block', flexShrink: 0 }} />
+                          <span>{opt.text}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
+
+          {/* Mensaje final de agradecimiento previo */}
+          <div style={{
+            marginTop: '2.5rem',
+            padding: '1.5rem 2rem',
+            borderRadius: 'var(--radius-lg)',
+            background: 'linear-gradient(90deg, rgba(159, 232, 112, 0.1), rgba(255, 255, 255, 0.02))',
+            borderLeft: '4px solid var(--color-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            borderRight: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--color-border)'
+          }}>
+            <span style={{ fontSize: '1.5rem' }}>🙌</span>
+            <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--color-text-main)', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
+              &quot;Agradecemos y apreciamos mucho su participación {survey.isMandatory ? 'obligatoria' : 'voluntaria'} en el proceso.&quot;
+            </p>
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4rem', paddingTop: '1.75rem', borderTop: '1px solid var(--color-border)' }}>
-          <button 
-            type="button" 
-            onClick={() => setStep('PRESENTATION')} 
+          <button
+            type="button"
+            onClick={() => setStep('PRESENTATION')}
             style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '1.05rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            ← Volver a Portada
+            ← Volver
           </button>
-          <button 
+          <button
             type="button"
             onClick={() => {
               if (survey.requireDemographics) {
@@ -269,9 +296,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
               } else {
                 handleStart();
               }
-            }} 
+            }}
             disabled={isSubmitting}
-            className="btn-primary" 
+            className="btn-primary"
             style={{ padding: '1.2rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '50px', cursor: 'pointer', boxShadow: '0 10px 30px rgba(159, 232, 112, 0.2)' }}
           >
             {isSubmitting ? 'Iniciando...' : 'Comenzar'}
@@ -294,7 +321,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             Esta experiencia es 100% anónima. Tus datos nos ayudan a segmentar y mejorar las métricas analíticas.
           </p>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', marginBottom: '3rem' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué rango de edad te encuentras?</label>
@@ -321,18 +348,18 @@ export default function SurveyClient({ survey }: { survey: any }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button 
-            type="button" 
-            onClick={() => setStep('INSTRUCTIONS')} 
+          <button
+            type="button"
+            onClick={() => setStep('INSTRUCTIONS')}
             style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
           >
             ← Instrucciones
           </button>
-          <button 
+          <button
             type="button"
-            className="btn-primary" 
-            style={{ padding: '1.1rem 2.8rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }} 
-            onClick={handleStart} 
+            className="btn-primary"
+            style={{ padding: '1.1rem 2.8rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
+            onClick={handleStart}
             disabled={isSubmitting || !ageGroup || !sex}
           >
             {isSubmitting ? 'Iniciando...' : 'Ir a las Preguntas →'}
@@ -408,9 +435,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
                         <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
                           <div style={{
-                            width: '26px', 
-                            height: '26px', 
-                            borderRadius: '50%', 
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: '50%',
                             border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
                             display: 'flex',
                             alignItems: 'center',
@@ -420,9 +447,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
                           }}>
                             {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
                           </div>
-                          <input 
-                            type="radio" 
-                            name={`matrix-${q.id}`} 
+                          <input
+                            type="radio"
+                            name={`matrix-${q.id}`}
                             checked={matrixAnswers[q.id] === opt.id}
                             onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
                             style={{ display: 'none' }}
@@ -436,13 +463,13 @@ export default function SurveyClient({ survey }: { survey: any }) {
             </table>
           </div>
 
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={handleSubmitMatrix}
             disabled={isSubmitting || Object.keys(matrixAnswers).length < survey.questions.length}
             style={{ width: '100%', padding: '1.25rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
           >
-              {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
+            {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
           </button>
         </motion.div>
       ) : (
@@ -454,18 +481,18 @@ export default function SurveyClient({ survey }: { survey: any }) {
 
           return (
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.div
                 key={q.id}
-                initial={{ opacity: 0, x: 80, scale: 0.98 }} 
-                animate={{ opacity: 1, x: 0, scale: 1 }} 
+                initial={{ opacity: 0, x: 80, scale: 0.98 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: -80, scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                className="card" 
+                className="card"
                 style={{ padding: '0', overflow: 'hidden' }}
               >
                 {/* Progress Bar */}
                 <div className="progress-track" style={{ borderRadius: 0, height: '6px', background: 'rgba(255,255,255,0.05)' }}>
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
@@ -479,14 +506,14 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       Pregunta {currentStep + 1} de {survey.questions.length}
                     </span>
                   </div>
-                  
+
                   <h2 style={{ fontSize: '1.85rem', marginBottom: '2.5rem', fontWeight: 600, lineHeight: 1.4, color: 'var(--color-text-main)' }}>{q.text}</h2>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3.5rem' }}>
                     {q.type === 'TEXT' && (
-                      <textarea 
-                        className="input-base" 
-                        rows={6} 
+                      <textarea
+                        className="input-base"
+                        rows={6}
                         style={{ fontSize: '1.125rem', resize: 'vertical', padding: '1.25rem' }}
                         placeholder="Escribe tu respuesta con el mayor detalle posible..."
                         value={textAnswer}
@@ -494,16 +521,16 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       />
                     )}
 
-                    {q.type === 'SINGLE_CHOICE' && q.options && q.options.map((opt:any) => (
-                      <label 
-                        key={opt.id} 
+                    {q.type === 'SINGLE_CHOICE' && q.options && q.options.map((opt: any) => (
+                      <label
+                        key={opt.id}
                         className={`question-option ${selectedOptionId === opt.id ? "question-option-active" : ""}`}
                         style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedOptionId === opt.id ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-border)'}` }}
                       >
-                        <div style={{ 
-                          width: '24px', 
-                          height: '24px', 
-                          borderRadius: '50%', 
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
                           border: `2px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
                           display: 'flex',
                           alignItems: 'center',
@@ -513,9 +540,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
                         }}>
                           {selectedOptionId === opt.id && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
                         </div>
-                        <input 
-                          type="radio" 
-                          name={`q-${q.id}`} 
+                        <input
+                          type="radio"
+                          name={`q-${q.id}`}
                           checked={selectedOptionId === opt.id}
                           onChange={() => setSelectedOptionId(opt.id)}
                           style={{ display: 'none' }}
@@ -524,16 +551,16 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       </label>
                     ))}
 
-                    {q.type === 'MULTIPLE_CHOICE' && q.options && q.options.map((opt:any) => (
-                      <label 
-                        key={opt.id} 
+                    {q.type === 'MULTIPLE_CHOICE' && q.options && q.options.map((opt: any) => (
+                      <label
+                        key={opt.id}
                         className={`question-option ${selectedMultipleOptions.includes(opt.id) ? "question-option-active" : ""}`}
                         style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedMultipleOptions.includes(opt.id) ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-border)'}` }}
                       >
-                        <div style={{ 
-                          width: '24px', 
-                          height: '24px', 
-                          borderRadius: '6px', 
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '6px',
                           border: `2px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-text-muted)'}`,
                           display: 'flex',
                           alignItems: 'center',
@@ -544,12 +571,12 @@ export default function SurveyClient({ survey }: { survey: any }) {
                         }}>
                           {selectedMultipleOptions.includes(opt.id) && (
                             <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M1 5L5 9L13 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </div>
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedMultipleOptions.includes(opt.id)}
                           onChange={() => toggleMultipleOption(opt.id)}
                           style={{ display: 'none' }}
@@ -559,8 +586,8 @@ export default function SurveyClient({ survey }: { survey: any }) {
                     ))}
                   </div>
 
-                  <button 
-                    className="btn-primary" 
+                  <button
+                    className="btn-primary"
                     onClick={handleNextQuestion}
                     disabled={isSubmitting || (q.type === 'SINGLE_CHOICE' && !selectedOptionId) || (q.type === 'MULTIPLE_CHOICE' && selectedMultipleOptions.length === 0) || (q.type === 'TEXT' && !textAnswer.trim())}
                     style={{ width: '100%', padding: '1.25rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
