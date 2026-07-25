@@ -1,18 +1,16 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import { Share2, Copy, Check, Download, X } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 
 export default function ShareModal({ surveyId }: { surveyId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    // Generate absolute URL dynamically based on where the app is hosted
-    setUrl(`${window.location.origin}/survey/${surveyId}`);
-  }, [surveyId]);
+  const url = useMemo(
+    () => (typeof window === "undefined" ? "" : `${window.location.origin}/survey/${surveyId}`),
+    [surveyId]
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(url);
@@ -65,16 +63,18 @@ export default function ShareModal({ surveyId }: { surveyId: string }) {
       </button>
 
       {isOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(4px)' }}>
-          <div className="glass-panel" style={{ width: '90%', maxWidth: '400px', padding: '2rem', position: 'relative', border: '1px solid var(--color-border)' }}>
+        <div className="modal-backdrop">
+          <div className="modal-panel" style={{ width: '100%', maxWidth: '440px', position: 'relative' }}>
             <button 
               onClick={() => setIsOpen(false)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }}
+              className="btn-ghost"
+              style={{ position: 'absolute', top: '1rem', right: '1rem', padding: "0.35rem" }}
             >
               <X size={24} />
             </button>
 
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center', color: 'var(--color-primary)' }}>Compartir Encuesta</h3>
+            <div className="eyebrow" style={{ marginBottom: "1rem" }}>Compartir encuesta</div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem' }}>Enlace y QR de acceso</h3>
 
             {/* Enlace Directo */}
             <div style={{ marginBottom: '2rem' }}>
@@ -85,7 +85,7 @@ export default function ShareModal({ surveyId }: { surveyId: string }) {
                   readOnly 
                   value={url} 
                   className="input-base" 
-                  style={{ flex: 1, fontSize: '0.875rem', padding: '0.5rem', outline: 'none' }} 
+                  style={{ flex: 1, fontSize: '0.875rem', padding: '0.7rem 0.85rem', outline: 'none' }} 
                 />
                 <button 
                   onClick={handleCopy}
@@ -101,7 +101,7 @@ export default function ShareModal({ surveyId }: { surveyId: string }) {
             {/* Código QR */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-main)' }}>Código QR (Escaneable)</label>
-              <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+              <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: "1px solid var(--color-border)" }}>
                 <QRCodeSVG id={`qr-${surveyId}`} value={url} size={200} level="H" includeMargin={true} />
               </div>
               <button 

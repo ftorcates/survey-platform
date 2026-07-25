@@ -3,7 +3,18 @@
 import { Download, Search } from "lucide-react"
 import { useState } from "react"
 
-export default function AudienceTable({ responses }: { responses: any[] }) {
+type AudienceResponse = {
+  id: string;
+  createdAt: string | Date;
+  ageGroup?: string | null;
+  sex?: string | null;
+  location?: string | null;
+  survey: {
+    title: string;
+  };
+};
+
+export default function AudienceTable({ responses }: { responses: AudienceResponse[] }) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredResponses = responses.filter(r => 
@@ -39,8 +50,8 @@ export default function AudienceTable({ responses }: { responses: any[] }) {
   }
 
   return (
-    <div style={{ marginTop: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
+    <div>
+      <div className="page-header" style={{ marginBottom: "1rem" }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input 
@@ -57,49 +68,51 @@ export default function AudienceTable({ responses }: { responses: any[] }) {
         </button>
       </div>
 
-      <div className="glass-panel" style={{ overflowX: 'auto', padding: 0 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>Fecha</th>
-              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>Encuesta</th>
-              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>Rango Etario</th>
-              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>Sexo</th>
-              <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-primary)' }}>Ubicación</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredResponses.length > 0 ? (
-              filteredResponses.map((response) => (
-                <tr key={response.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                    {new Date(response.createdAt).toLocaleDateString()}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', fontWeight: 500 }}>
-                    {response.survey.title}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                    <span style={{ padding: '0.25rem 0.75rem', backgroundColor: 'rgba(79, 138, 139, 0.1)', borderRadius: '1rem', color: 'var(--color-primary)' }}>
-                      {response.ageGroup || 'N/A'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem' }}>
-                    {response.sex || 'N/A'}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                    {response.location || 'N/A'}
+      <div className="card table-shell">
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Encuesta</th>
+                <th>Rango etario</th>
+                <th>Sexo</th>
+                <th>Ubicación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResponses.length > 0 ? (
+                filteredResponses.map((response) => (
+                  <tr key={response.id}>
+                    <td style={{ fontSize: '0.92rem' }}>
+                      {new Date(response.createdAt).toLocaleDateString()}
+                    </td>
+                    <td style={{ fontSize: '0.92rem', fontWeight: 700 }}>
+                      {response.survey.title}
+                    </td>
+                    <td style={{ fontSize: '0.92rem' }}>
+                      <span className="chip" style={{ color: "var(--color-primary)" }}>
+                        {response.ageGroup || 'N/A'}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: '0.92rem' }}>
+                      {response.sex || 'N/A'}
+                    </td>
+                    <td style={{ fontSize: '0.92rem', color: 'var(--color-text-muted)' }}>
+                      {response.location || 'N/A'}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                    No se encontraron registros de audiencia.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-                  No se encontraron registros de audiencia.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

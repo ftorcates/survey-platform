@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import ProfileForm from "./ProfileForm"
+import { Settings2 } from "lucide-react"
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -9,12 +10,18 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text', marginBottom: '0.5rem' }}>Configuración</h1>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>
-          Gestiona tus datos personales y preferencias de la plataforma.
-        </p>
+    <div style={{ maxWidth: '920px' }}>
+      <div className="page-header">
+        <div>
+          <div className="eyebrow">
+            <Settings2 size={14} />
+            Configuración
+          </div>
+          <h1 className="section-title" style={{ marginTop: "1rem" }}>Preferencias de cuenta</h1>
+          <p className="section-copy">
+            Actualiza tu perfil visible y revisa el estado de tu acceso.
+          </p>
+        </div>
       </div>
 
       <ProfileForm user={session.user} />

@@ -1,6 +1,6 @@
 import { getGlobalAudience } from "../actions"
 import AudienceTable from "./AudienceTable"
-import { Users, UserCheck, BarChart } from "lucide-react"
+import { BarChart3, ScanSearch, Users } from "lucide-react"
 
 export default async function AudiencePage() {
   const responses = await getGlobalAudience();
@@ -9,32 +9,37 @@ export default async function AudiencePage() {
   const uniqueSurveys = new Set(responses.map(r => r.surveyId)).size;
   
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text', marginBottom: '0.5rem' }}>Audiencia Global</h1>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>
-          Gestiona y analiza a todos los participantes de tus estudios en un solo lugar.
-        </p>
+    <div>
+      <div className="page-header">
+        <div>
+          <div className="eyebrow">
+            <ScanSearch size={14} />
+            Audiencias
+          </div>
+          <h1 className="section-title" style={{ marginTop: "1rem" }}>Resumen de respuestas</h1>
+          <p className="section-copy">
+            Una vista agregada de participación por encuesta, demografía y fecha.
+          </p>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(79, 138, 139, 0.1)', borderRadius: 'var(--radius-md)' }}>
+      <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
+        <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(159, 232, 112, 0.1)', borderRadius: 'var(--radius-lg)' }}>
             <Users color="var(--color-primary)" size={24} />
           </div>
           <div>
-            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Total Participantes</p>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700 }}>{totalParticipants}</p>
+            <p className="stat-label">Participantes</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: "0.4rem" }}>{totalParticipants}</p>
           </div>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ padding: '0.75rem', backgroundColor: 'rgba(79, 138, 139, 0.1)', borderRadius: 'var(--radius-md)' }}>
-            <BarChart color="var(--color-primary)" size={24} />
+        <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(255, 107, 87, 0.12)', borderRadius: 'var(--radius-lg)' }}>
+            <BarChart3 color="var(--color-secondary)" size={24} />
           </div>
           <div>
-            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Encuestas Activas</p>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700 }}>{uniqueSurveys}</p>
+            <p className="stat-label">Encuestas activas</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: "0.4rem" }}>{uniqueSurveys}</p>
           </div>
         </div>
       </div>

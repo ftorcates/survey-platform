@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma"
 import SurveyBuilder from "./SurveyBuilder"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, PencilRuler } from "lucide-react"
 import { auth } from "@/auth"
 
 export default async function EditSurveyPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,13 +25,17 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
   if (!survey || survey.authorId !== session?.user?.id) return notFound();
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1040px' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)', textDecoration: 'none', marginBottom: '1rem' }}>
+        <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)', textDecoration: 'none', marginBottom: '1rem', fontWeight: 700 }}>
           <ArrowLeft size={16} /> Volver al Dashboard
         </Link>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--color-text-main)' }}>{survey.title}</h1>
-        <p style={{ color: 'var(--color-text-muted)' }}>Construye el flujo de tu encuesta y define la lógica de ramificación (Branching).</p>
+        <div className="eyebrow">
+          <PencilRuler size={14} />
+          Edición de encuesta
+        </div>
+        <h1 className="section-title" style={{ marginTop: "1rem" }}>{survey.title}</h1>
+        <p className="section-copy">Construye el flujo de preguntas y define la lógica de ramificación sin salir del panel.</p>
       </div>
 
       <SurveyBuilder survey={survey} />

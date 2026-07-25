@@ -1,45 +1,68 @@
 import { signIn } from "@/auth"
-import { LogIn } from "lucide-react"
+import { ArrowRight, KeyRound, RadioTower, ShieldCheck } from "lucide-react"
 
 export default function LoginPage() {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)' }}>
-      <div className="glass-panel" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', textAlign: 'center' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <div style={{ width: '64px', height: '64px', backgroundColor: 'rgba(79, 138, 139, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-            <LogIn size={32} color="var(--color-primary)" />
+    <div className="auth-shell">
+      <div className="auth-card">
+        <section className="hero-panel" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "620px" }}>
+          <div>
+            <div className="eyebrow">
+              <RadioTower size={14} />
+              Acceso al centro
+            </div>
+            <h1 className="section-title" style={{ marginTop: "1.2rem" }}>
+              Entra al panel de estudios.
+            </h1>
+            <p className="section-copy">
+              El login conserva Google OAuth y te lleva directo al dashboard para crear encuestas, revisar audiencias y ajustar configuración.
+            </p>
           </div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text-main)' }}>Bienvenido</h1>
-          <p style={{ color: 'var(--color-text-muted)' }}>Inicia sesión para gestionar tus encuestas</p>
-        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="signal-panel" style={{ minHeight: "260px" }}>
+            <div className="scanline" />
+            <span className="chip">
+              <ShieldCheck size={14} />
+              Sesión protegida
+            </span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.55rem", alignItems: "end", height: "150px", marginTop: "1.4rem" }} aria-hidden="true">
+              {[38, 74, 46, 92, 58, 81].map((height, index) => (
+                <span key={index} style={{ height: `${height}%`, background: index === 3 ? "var(--color-primary)" : "rgba(101, 213, 255, 0.5)", display: "block" }} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{ marginBottom: "2rem" }}>
+            <div className="brand-badge" style={{ marginBottom: "1rem" }}>
+              <KeyRound size={22} />
+            </div>
+            <h2 style={{ fontSize: "1.8rem", marginBottom: "0.45rem", textTransform: "uppercase" }}>Iniciar sesión</h2>
+            <p style={{ color: "var(--color-text-muted)", lineHeight: 1.7 }}>
+              Entra con tu cuenta de Google para acceder a tus encuestas y resultados.
+            </p>
+          </div>
+
           <form
             action={async () => {
               "use server"
               await signIn("google", { redirectTo: "/admin" })
             }}
           >
-            <button className="btn-primary" style={{ width: '100%', padding: '0.75rem' }}>
+            <button className="btn-primary" style={{ width: "100%" }}>
               Continuar con Google
+              <ArrowRight size={17} />
             </button>
           </form>
 
-          <form
-            action={async () => {
-              "use server"
-              await signIn("github", { redirectTo: "/admin" })
-            }}
-          >
-            <button className="btn-secondary" style={{ width: '100%', padding: '0.75rem' }}>
-              Continuar con GitHub
-            </button>
-          </form>
-        </div>
+          <div className="divider" style={{ margin: "1.5rem 0" }} />
 
-        <p style={{ marginTop: '2rem', fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-          Al iniciar sesión, aceptas nuestros términos y condiciones.
-        </p>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", color: "var(--color-text-muted)", fontSize: "0.92rem", lineHeight: 1.6 }}>
+            <ShieldCheck size={18} style={{ marginTop: "0.1rem", flexShrink: 0 }} />
+            El acceso conserva el flujo actual de autenticación y dirige al panel administrativo.
+          </div>
+        </section>
       </div>
     </div>
   )

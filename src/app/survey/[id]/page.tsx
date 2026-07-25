@@ -23,15 +23,26 @@ export default async function SurveyPage({ params }: { params: Promise<{ id: str
   if (!survey) return notFound();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header className="glass-panel" style={{ margin: '1rem', padding: '1rem', textAlign: 'center', borderRadius: 'var(--radius-xl)' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'transparent', backgroundImage: 'linear-gradient(135deg, var(--color-primary), var(--color-cta))', backgroundClip: 'text', WebkitBackgroundClip: 'text' }}>
-          {survey.title}
-        </h1>
-      </header>
-      
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ width: '100%', maxWidth: '700px', position: 'relative' }}>
+    <div className="container page-shell" style={{ minHeight: '100vh', display: 'grid', alignItems: 'center' }}>
+      <main className="survey-frame" style={{ position: 'relative' }}>
+        <header style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "1rem", alignItems: "end", marginBottom: "1rem" }}>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "0.8rem" }}>Encuesta activa</div>
+            <h1 style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', lineHeight: 0.95, fontWeight: 800, textTransform: "uppercase" }}>
+              {survey.title}
+            </h1>
+            {survey.description ? (
+              <p style={{ color: "var(--color-text-muted)", marginTop: "0.75rem", lineHeight: 1.65 }}>
+                {survey.description}
+              </p>
+            ) : null}
+          </div>
+          <div className="card stat-card" style={{ minWidth: "130px" }}>
+            <div className="stat-label">Preguntas</div>
+            <div className="stat-value">{survey.questions.length}</div>
+          </div>
+        </header>
+        <div style={{ width: '100%', position: 'relative' }}>
           <SurveyClient survey={survey} />
         </div>
       </main>
