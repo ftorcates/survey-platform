@@ -93,11 +93,11 @@ export default function CreateSurveyModal() {
                       border: '2px dashed var(--color-border)', 
                       borderRadius: 'var(--radius-lg)', 
                       cursor: 'pointer',
-                      backgroundColor: 'rgba(255,255,255,0.02)',
+                      backgroundColor: 'var(--color-bg)',
                       transition: 'background-color 0.2s',
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
-                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)')}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg)')}
                   >
                     <ImageIcon size={28} style={{ color: 'var(--color-text-muted)', marginBottom: '0.5rem' }} />
                     <span style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: '0.95rem' }}>Haz clic aquí para seleccionar una imagen</span>
@@ -168,7 +168,7 @@ export default function CreateSurveyModal() {
                       borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${isMandatory ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: isMandatory ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)',
+                      backgroundColor: isMandatory ? 'var(--color-accent-soft)' : 'var(--color-bg)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.6rem'
@@ -188,7 +188,7 @@ export default function CreateSurveyModal() {
                       borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${!isMandatory ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: !isMandatory ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)',
+                      backgroundColor: !isMandatory ? 'var(--color-accent-soft)' : 'var(--color-bg)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.6rem'
@@ -203,7 +203,7 @@ export default function CreateSurveyModal() {
                 </div>
               </div>
 
-              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', backgroundColor: 'rgba(255,255,255,0.025)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+              <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                 <input 
                   type="checkbox" 
                   name="requireDemographics" 
@@ -227,7 +227,7 @@ export default function CreateSurveyModal() {
                       borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${type === "CUSTOM" ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: type === "CUSTOM" ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)'
+                      backgroundColor: type === "CUSTOM" ? 'var(--color-accent-soft)' : 'var(--color-bg)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', color: type === "CUSTOM" ? 'var(--color-primary)' : 'inherit' }}>
@@ -244,7 +244,7 @@ export default function CreateSurveyModal() {
                       borderRadius: 'var(--radius-lg)', 
                       border: `2px solid ${type === "FIXED_SCALE" ? 'var(--color-primary)' : 'var(--color-border)'}`,
                       cursor: 'pointer',
-                      backgroundColor: type === "FIXED_SCALE" ? 'rgba(159, 232, 112, 0.1)' : 'rgba(255,255,255,0.045)'
+                      backgroundColor: type === "FIXED_SCALE" ? 'var(--color-accent-soft)' : 'var(--color-bg)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', color: type === "FIXED_SCALE" ? 'var(--color-primary)' : 'inherit' }}>
@@ -259,7 +259,7 @@ export default function CreateSurveyModal() {
               </div>
 
               {type === "FIXED_SCALE" && (
-                <div style={{ marginBottom: '1.5rem', padding: '1.25rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-lg)', border: "1px solid var(--color-border)" }}>
+                <div style={{ marginBottom: '1.5rem', padding: '1.25rem', backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-lg)', border: "1px solid var(--color-border)" }}>
                   <div style={{ marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <input 
                       type="checkbox" 

@@ -60,7 +60,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>Email (No editable)</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.9rem 1rem', backgroundColor: 'rgba(255,255,255,0.045)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-muted)', fontSize: '0.875rem', border: "1px solid var(--color-border)" }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.9rem 1rem', backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-muted)', fontSize: '0.875rem', border: "1px solid var(--color-border)" }}>
               <Mail size={16} /> {user.email}
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>
           Tu cuenta está protegida mediante autenticación social. No es necesario gestionar contraseñas locales.
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', backgroundColor: 'rgba(159, 232, 112, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', backgroundColor: 'var(--color-accent-soft)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
           <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Autenticación verificada vía Google/GitHub</span>
         </div>

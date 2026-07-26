@@ -155,9 +155,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
           flexDirection: 'column',
           justifyContent: 'space-between',
           alignItems: 'center',
-          background: 'linear-gradient(145deg, var(--color-surface), rgba(15, 20, 25, 0.9))',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.35)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'linear-gradient(145deg, var(--color-surface), var(--color-surface-solid))',
+          boxShadow: 'var(--shadow-lg)',
+          border: '1px solid var(--color-border)',
           position: 'relative',
           overflow: 'hidden',
           width: '100%',
@@ -166,7 +166,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
         }}
       >
         {/* Subtle radial light highlight in background */}
-        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(159, 232, 112, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '400px', background: 'radial-gradient(circle, var(--color-accent-soft) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         {/* Top Section: Logo and Hierarchy (Centrados) */}
         <div style={{ width: '100%', maxWidth: '650px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.75rem' }}>
@@ -221,7 +221,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.85rem',
-              boxShadow: '0 10px 35px rgba(159, 232, 112, 0.25)',
+              boxShadow: '0 10px 35px var(--color-accent-focus)',
               cursor: 'pointer'
             }}
           >
@@ -251,11 +251,11 @@ export default function SurveyClient({ survey }: { survey: any }) {
             Antes de comenzar
           </h2>
           {survey.description ? (
-            <div style={{ fontSize: '1.15rem', lineHeight: 1.75, color: 'var(--color-text-muted)', whiteSpace: 'pre-wrap', background: 'rgba(255,255,255,0.02)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+            <div style={{ fontSize: '1.15rem', lineHeight: 1.75, color: 'var(--color-text-muted)', whiteSpace: 'pre-wrap', background: 'var(--color-bg)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
               {survey.description}
             </div>
           ) : (
-            <div style={{ fontSize: '1.15rem', color: 'var(--color-text-muted)', lineHeight: 1.75, background: 'rgba(255,255,255,0.02)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+            <div style={{ fontSize: '1.15rem', color: 'var(--color-text-muted)', lineHeight: 1.75, background: 'var(--color-bg)', padding: '2.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
               Por favor responde a todas las preguntas con atención y sinceridad. Tu opinión es el pilar para nuestras mejoras continuas y toda la información suministrada se procesa de forma completamente confidencial.
             </div>
           )}
@@ -292,7 +292,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             marginTop: '2.5rem',
             padding: '1.5rem 2rem',
             borderRadius: 'var(--radius-lg)',
-            background: 'linear-gradient(90deg, rgba(159, 232, 112, 0.1), rgba(255, 255, 255, 0.02))',
+            background: 'linear-gradient(90deg, var(--color-accent-soft), rgba(255, 255, 255, 0.02))',
             borderLeft: '4px solid var(--color-primary)',
             display: 'flex',
             alignItems: 'center',
@@ -327,7 +327,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             }}
             disabled={isSubmitting}
             className="btn-primary"
-            style={{ padding: '1.2rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '50px', cursor: 'pointer', boxShadow: '0 10px 30px rgba(159, 232, 112, 0.2)' }}
+            style={{ padding: '1.2rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '50px', cursor: 'pointer', boxShadow: 'var(--shadow-glow)' }}
           >
             {isSubmitting ? 'Iniciando...' : 'Comenzar'}
           </button>
@@ -401,7 +401,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
   if (step === 'FINISHED') {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9, y: 40 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ type: "spring", bounce: 0.4 }} className="card" style={{ padding: '5rem 2.5rem', textAlign: 'center', borderTop: '5px solid var(--color-success)', maxWidth: '680px', margin: '0 auto' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(159, 232, 112, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto', border: '2px solid var(--color-success)' }}>
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--color-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto', border: '2px solid var(--color-success)' }}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -484,7 +484,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                               alignItems: 'center',
                               justifyContent: 'center',
                               transition: 'all 0.2s',
-                              backgroundColor: matrixAnswers[q.id] === opt.id ? 'rgba(159, 232, 112, 0.15)' : 'transparent'
+                              backgroundColor: matrixAnswers[q.id] === opt.id ? 'var(--color-accent-soft)' : 'transparent'
                             }}>
                               {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
                             </div>
@@ -567,7 +567,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                 style={{ padding: '0', overflow: 'hidden' }}
               >
                 {/* Progress Bar */}
-                <div className="progress-track" style={{ borderRadius: 0, height: '6px', background: 'rgba(255,255,255,0.05)' }}>
+                <div className="progress-track" style={{ borderRadius: 0, height: '6px', background: 'var(--color-bg-hover)' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
@@ -601,7 +601,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       <label
                         key={opt.id}
                         className={`question-option ${selectedOptionId === opt.id ? "question-option-active" : ""}`}
-                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedOptionId === opt.id ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-border)'}` }}
+                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedOptionId === opt.id ? 'var(--color-accent-soft)' : 'var(--color-bg)', border: `1px solid ${selectedOptionId === opt.id ? 'var(--color-primary)' : 'var(--color-border)'}` }}
                       >
                         <div style={{
                           width: '24px',
@@ -631,7 +631,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                       <label
                         key={opt.id}
                         className={`question-option ${selectedMultipleOptions.includes(opt.id) ? "question-option-active" : ""}`}
-                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedMultipleOptions.includes(opt.id) ? 'rgba(159, 232, 112, 0.08)' : 'var(--color-bg)', border: `1px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-border)'}` }}
+                        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem', background: selectedMultipleOptions.includes(opt.id) ? 'var(--color-accent-soft)' : 'var(--color-bg)', border: `1px solid ${selectedMultipleOptions.includes(opt.id) ? 'var(--color-cta)' : 'var(--color-border)'}` }}
                       >
                         <div style={{
                           width: '24px',
@@ -679,4 +679,3 @@ export default function SurveyClient({ survey }: { survey: any }) {
     </div>
   );
 }
-

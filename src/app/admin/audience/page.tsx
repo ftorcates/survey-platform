@@ -25,7 +25,7 @@ export default async function AudiencePage() {
 
       <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
         <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(159, 232, 112, 0.1)', borderRadius: 'var(--radius-lg)' }}>
+          <div style={{ padding: '0.85rem', backgroundColor: 'var(--color-accent-soft)', borderRadius: 'var(--radius-lg)' }}>
             <Users color="var(--color-primary)" size={24} />
           </div>
           <div>
