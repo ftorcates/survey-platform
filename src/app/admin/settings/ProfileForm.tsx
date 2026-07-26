@@ -14,15 +14,17 @@ type ProfileUser = {
 export default function ProfileForm({ user }: { user: ProfileUser }) {
   const [name, setName] = useState(user.name || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
+    setStatus(null);
     try {
       await updateUserProfile({ name });
-      alert("Perfil actualizado correctamente");
+      setStatus("Perfil actualizado correctamente.");
     } catch {
-      alert("Error al actualizar el perfil");
+      setStatus("No pudimos actualizar el perfil. Intenta nuevamente.");
     } finally {
       setIsSaving(false);
     }
@@ -30,7 +32,8 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div className="card" style={{ padding: '2rem' }}>
+      <div className="dashboard-grid">
+      <div className="card survey-card profile-card-main">
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <User size={20} color="var(--color-primary)" /> Información del Perfil
         </h3>
@@ -67,7 +70,7 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
         </div>
       </div>
 
-      <div className="card" style={{ padding: '2rem' }}>
+      <div className="card survey-card profile-card-side">
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ShieldCheck size={20} color="var(--color-primary)" /> Seguridad y Cuenta
         </h3>
@@ -79,8 +82,10 @@ export default function ProfileForm({ user }: { user: ProfileUser }) {
           <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Autenticación verificada vía Google/GitHub</span>
         </div>
       </div>
+      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+        {status && <p style={{ color: status.startsWith("No") ? "var(--color-error)" : "var(--color-success)", fontWeight: 700 }}>{status}</p>}
         <button type="submit" className="btn-primary" disabled={isSaving} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 2rem' }}>
           <Save size={18} /> {isSaving ? "Guardando..." : "Guardar Cambios"}
         </button>

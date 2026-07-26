@@ -10,36 +10,44 @@ export default async function AudiencePage() {
   
   return (
     <div>
-      <div className="page-header">
-        <div>
+      <section className="dashboard-hero">
+        <div className="card dashboard-hero-main">
           <div className="eyebrow">
             <ScanSearch size={14} />
             Audiencias
           </div>
-          <h1 className="section-title" style={{ marginTop: "1rem" }}>Resumen de respuestas</h1>
+          <h1 className="section-title">Mapa agregado de respuestas.</h1>
           <p className="section-copy">
-            Una vista agregada de participación por encuesta, demografía y fecha.
+            Cruza participación, encuesta, demografía y fecha desde una vista más editorial y menos tabular como punto de entrada.
           </p>
         </div>
-      </div>
 
-      <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
-        <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'var(--color-accent-soft)', borderRadius: 'var(--radius-lg)' }}>
-            <Users color="var(--color-primary)" size={24} />
-          </div>
+        <aside className="card dashboard-hero-side">
           <div>
             <p className="stat-label">Participantes</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: "0.4rem" }}>{totalParticipants}</p>
+            <p className="stat-value">{totalParticipants}</p>
           </div>
-        </div>
-        <div className="card stat-card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ padding: '0.85rem', backgroundColor: 'rgba(255, 107, 87, 0.12)', borderRadius: 'var(--radius-lg)' }}>
-            <BarChart3 color="var(--color-secondary)" size={24} />
-          </div>
+          <div className="divider" />
           <div>
             <p className="stat-label">Encuestas activas</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: "0.4rem" }}>{uniqueSurveys}</p>
+            <p className="stat-value">{uniqueSurveys}</p>
+          </div>
+          <div style={{ display: "flex", gap: "0.6rem", color: "var(--color-text-muted)" }}>
+            <Users size={20} />
+            <BarChart3 size={20} />
+          </div>
+        </aside>
+      </section>
+
+      <div className="stats-grid" style={{ marginBottom: "1.2rem" }}>
+        <div className="soft-card stat-card">
+          <p className="stat-label">Participantes</p>
+          <p className="stat-value">{totalParticipants}</p>
+        </div>
+        <div className="soft-card stat-card">
+          <div>
+            <p className="stat-label">Encuestas activas</p>
+            <p className="stat-value">{uniqueSurveys}</p>
           </div>
         </div>
       </div>

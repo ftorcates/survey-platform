@@ -301,7 +301,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             borderTop: '1px solid var(--color-border)',
             borderBottom: '1px solid var(--color-border)'
           }}>
-            <span style={{ fontSize: '1.5rem' }}>🙌</span>
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--color-primary)', boxShadow: '0 0 24px var(--color-accent-focus)', flexShrink: 0 }} />
             <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--color-text-main)', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
               &quot;Agradecemos y apreciamos mucho su participación {survey.isMandatory ? 'obligatoria' : 'voluntaria'} en el proceso.&quot;
             </p>

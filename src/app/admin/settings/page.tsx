@@ -10,19 +10,30 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div style={{ maxWidth: '920px' }}>
-      <div className="page-header">
-        <div>
+    <div>
+      <section className="dashboard-hero">
+        <div className="card dashboard-hero-main">
           <div className="eyebrow">
             <Settings2 size={14} />
             Configuración
           </div>
-          <h1 className="section-title" style={{ marginTop: "1rem" }}>Preferencias de cuenta</h1>
+          <h1 className="section-title">Preferencias de cuenta.</h1>
           <p className="section-copy">
-            Actualiza tu perfil visible y revisa el estado de tu acceso.
+            Ajusta tu identidad visible y revisa el estado de acceso sin salir del lenguaje visual del tablero.
           </p>
         </div>
-      </div>
+        <aside className="card dashboard-hero-side">
+          <div>
+            <p className="stat-label">Sesión</p>
+            <p className="stat-value" style={{ fontSize: "2rem" }}>Activa</p>
+          </div>
+          <div className="divider" />
+          <div>
+            <p className="stat-label">Proveedor</p>
+            <p className="stat-value" style={{ fontSize: "2rem" }}>OAuth</p>
+          </div>
+        </aside>
+      </section>
 
       <ProfileForm user={session.user} />
     </div>

@@ -25,7 +25,7 @@ export default function AdminSidebar({
         </div>
         <div>
           <div className="brand-kicker">Survey Platform</div>
-          <div className="brand-title">Control Center</div>
+          <div className="brand-title">Atelier</div>
         </div>
       </div>
       <nav className="nav-list" aria-label="Navegación principal">

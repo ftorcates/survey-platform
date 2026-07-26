@@ -9,79 +9,108 @@ export default async function AdminDashboard() {
   const surveys = await getSurveys();
   const totalResponses = surveys.reduce((sum, survey) => sum + survey._count.responses, 0);
   const totalQuestions = surveys.reduce((sum, survey) => sum + survey._count.questions, 0);
+  const responseRate = surveys.length > 0 ? Math.round(totalResponses / surveys.length) : 0;
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <div className="eyebrow">
-            <PanelsTopLeft size={14} />
-            Dashboard
+      <section className="dashboard-hero">
+        <div className="card dashboard-hero-main">
+          <div>
+            <div className="eyebrow">
+              <PanelsTopLeft size={14} />
+              Dashboard
+            </div>
+            <h1 className="section-title">Mesa de trabajo para tus estudios.</h1>
+            <p className="section-copy">
+              Crea, edita, publica y lee resultados desde un tablero más visual, pensado para comparar encuestas en vez de recorrer una lista plana.
+            </p>
           </div>
-          <h1 className="section-title" style={{ marginTop: "1rem" }}>Tus encuestas</h1>
-          <p className="section-copy">Gestiona creación, edición, publicación y lectura de métricas desde una sola vista.</p>
+          <div className="hero-actions">
+            <CreateSurveyModal />
+            <Link href="/admin/audience" className="btn-secondary">
+              Ver audiencias
+            </Link>
+          </div>
         </div>
-        <CreateSurveyModal />
-      </div>
 
-      <div className="stats-grid" style={{ marginBottom: "1.5rem" }}>
-        <div className="card stat-card">
-          <div className="stat-label">Encuestas creadas</div>
-          <div className="stat-value">{surveys.length}</div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-label">Respuestas totales</div>
-          <div className="stat-value">{totalResponses}</div>
-        </div>
-        <div className="card stat-card">
+        <aside className="card dashboard-hero-side" aria-label="Resumen del tablero">
+          <div>
+            <div className="stat-label">Encuestas creadas</div>
+            <div className="stat-value">{surveys.length}</div>
+          </div>
+          <div className="divider" />
+          <div>
+            <div className="stat-label">Respuestas totales</div>
+            <div className="stat-value">{totalResponses}</div>
+          </div>
+          <div className="divider" />
+          <div>
+            <div className="stat-label">Promedio por encuesta</div>
+            <div className="stat-value">{responseRate}</div>
+          </div>
+        </aside>
+      </section>
+
+      <div className="stats-grid" style={{ marginBottom: "1.2rem" }}>
+        <div className="soft-card stat-card">
           <div className="stat-label">Preguntas activas</div>
           <div className="stat-value">{totalQuestions}</div>
         </div>
+        <div className="soft-card stat-card">
+          <div className="stat-label">Publicaciones listas</div>
+          <div className="stat-value">{surveys.length}</div>
+        </div>
+        <div className="soft-card stat-card">
+          <div className="stat-label">Lectura agregada</div>
+          <div className="stat-value">{totalResponses > 0 ? "On" : "Off"}</div>
+        </div>
       </div>
 
-      <div className="dashboard-grid">
+      <section className="dashboard-grid" aria-label="Encuestas creadas">
         {surveys.length === 0 ? (
-          <div className="card" style={{ padding: "3rem", textAlign: "center", gridColumn: "1 / -1" }}>
-            <div style={{ width: "4rem", height: "4rem", borderRadius: "var(--radius-lg)", margin: "0 auto 1rem", background: "var(--color-accent-soft)", display: "grid", placeItems: "center" }}>
-              <FileText size={24} color="var(--color-primary)" />
+          <div className="card" style={{ gridColumn: "1 / -1", padding: "3rem", textAlign: "center" }}>
+            <div className="brand-badge" style={{ margin: "0 auto 1rem" }}>
+              <FileText size={24} />
             </div>
-            <h3 style={{ fontSize: "1.4rem", marginBottom: "0.6rem" }}>Todavía no has creado encuestas</h3>
-            <p style={{ color: "var(--color-text-muted)", marginBottom: "1.25rem" }}>
-              Empieza con una nueva encuesta y luego revísala desde este panel.
+            <h3 style={{ fontSize: "2rem", marginBottom: "0.6rem" }}>Todavía no has creado encuestas</h3>
+            <p style={{ color: "var(--color-text-muted)", margin: "0 auto 1.25rem", maxWidth: "48ch", lineHeight: 1.7 }}>
+              Empieza con una nueva encuesta y luego vuelve a este tablero para editarla, compartirla o revisar métricas.
             </p>
             <CreateSurveyModal />
           </div>
         ) : (
           surveys.map(survey => (
             <article key={survey.id} className="card survey-card">
-              <div>
+              <div className="survey-card__body">
                 <span className="chip">
                   <MessageSquare size={14} />
                   Encuesta
                 </span>
-                <h3 style={{ fontSize: "1.35rem", margin: "0.75rem 0 0.35rem", textTransform: "uppercase" }}>{survey.title}</h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.94rem', lineHeight: 1.65 }}>
-                  {survey.description || 'Sin descripción'}
+                <h3 className="survey-card__title">
+                  {survey.title}
+                </h3>
+                <p className="survey-card__description">
+                  {survey.description || "Sin descripción"}
                 </p>
               </div>
 
               <div className="metric-strip">
                 <div>
                   <span className="stat-label">Resp.</span>
-                  <div style={{ fontSize: "1.7rem", fontWeight: 900, marginTop: "0.35rem", color: "var(--color-primary)" }}>{survey._count.responses}</div>
+                  <div className="stat-value" style={{ fontSize: "2rem" }}>{survey._count.responses}</div>
                 </div>
                 <div>
                   <span className="stat-label">Preg.</span>
-                  <div style={{ fontSize: "1.7rem", fontWeight: 900, marginTop: "0.35rem", color: "var(--color-cta)" }}>{survey._count.questions}</div>
+                  <div className="stat-value" style={{ fontSize: "2rem", color: "var(--color-cta)" }}>{survey._count.questions}</div>
                 </div>
               </div>
 
-              <div style={{ display: "grid", gap: "0.55rem" }}>
-                <Link href={`/admin/surveys/${survey.id}/edit`} className="btn-secondary" style={{ width: "100%" }}>
-                  <Edit3 size={16} style={{ marginRight: '0.25rem' }} /> Editar
+              <div className="survey-card__actions">
+                <Link href={`/admin/surveys/${survey.id}/edit`} className="btn-secondary">
+                  <Edit3 size={16} /> Editar
                 </Link>
-                <Link href={`/admin/surveys/${survey.id}/metrics`} className="btn-primary" style={{ width: "100%" }}>
-                  <BarChart2 size={16} style={{ marginRight: '0.25rem' }} /> Métricas
+                <Link href={`/admin/surveys/${survey.id}/metrics`} className="btn-primary">
+                  <BarChart2 size={16} /> Métricas
                 </Link>
                 <ShareModal surveyId={survey.id} />
                 <DeleteSurveyButton surveyId={survey.id} />
@@ -89,7 +118,7 @@ export default async function AdminDashboard() {
             </article>
           ))
         )}
-      </div>
+      </section>
     </div>
   );
 }
