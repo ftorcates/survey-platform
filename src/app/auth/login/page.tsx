@@ -1,5 +1,5 @@
 import { signIn } from "@/auth"
-import { ArrowRight, KeyRound, RadioTower, ShieldCheck } from "lucide-react"
+import { ArrowRight, KeyRound, Ruler, ShieldCheck } from "lucide-react"
 
 export default function LoginPage() {
   return (
@@ -8,14 +8,14 @@ export default function LoginPage() {
         <section className="hero-panel" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "620px" }}>
           <div>
             <div className="eyebrow">
-              <RadioTower size={14} />
-              Acceso al centro
+              <Ruler size={14} />
+              Registro de acceso
             </div>
             <h1 className="section-title" style={{ marginTop: "1.2rem" }}>
-              Entra al panel de estudios.
+              Abre tu expediente de estudios.
             </h1>
             <p className="section-copy">
-              El login conserva Google OAuth y te lleva directo al dashboard para crear encuestas, revisar audiencias y ajustar configuración.
+              El flujo mantiene Google OAuth intacto y te lleva directo al dashboard para crear encuestas, revisar audiencias y ajustar configuración.
             </p>
           </div>
 
@@ -27,7 +27,7 @@ export default function LoginPage() {
             </span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.55rem", alignItems: "end", height: "150px", marginTop: "1.4rem" }} aria-hidden="true">
               {[38, 74, 46, 92, 58, 81].map((height, index) => (
-                <span key={index} style={{ height: `${height}%`, background: index === 3 ? "var(--color-primary)" : "rgba(101, 213, 255, 0.5)", display: "block" }} />
+                <span key={index} style={{ height: `${height}%`, background: index === 3 ? "var(--color-primary)" : "var(--color-cta-soft)", display: "block" }} />
               ))}
             </div>
           </div>

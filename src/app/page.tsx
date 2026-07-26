@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowRight, BarChart3, ClipboardList, Gauge, RadioTower } from "lucide-react";
+import { ArrowRight, BarChart3, ClipboardList, Gauge, Ruler } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -18,8 +18,8 @@ export default function Home() {
         <div className="command-copy">
           <div>
             <motion.div className="eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <RadioTower size={14} />
-              Survey Platform
+              <Ruler size={14} />
+              Dossier de campo
             </motion.div>
 
             <motion.h1
@@ -28,7 +28,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              Centro de mando para estudios vivos.
+              Diseña, publica y audita encuestas como expedientes vivos.
             </motion.h1>
 
             <motion.p
@@ -37,7 +37,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.42 }}
             >
-              Crea encuestas, compártelas y lee audiencias como un flujo activo de señales. La interfaz prioriza contraste, ritmo operativo y datos accionables.
+              Una propuesta visual más física y editorial: grilla de trabajo, módulos duros y métricas legibles para operar encuestas sin perder el pulso de la audiencia.
             </motion.p>
 
             <motion.div
@@ -82,7 +82,7 @@ export default function Home() {
             <div className="scanline" />
             <span className="chip">
               <ClipboardList size={14} />
-              Encuesta activa
+              Expediente activo
             </span>
             <div className="pulse-bars" aria-hidden="true">
               {[52, 88, 41, 66, 93, 58, 79, 46, 90, 63, 74, 39, 82, 55, 69, 96].map((height, index) => (
@@ -91,7 +91,7 @@ export default function Home() {
             </div>
             <div style={{ marginTop: "1.25rem" }}>
               <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 3.5rem)", lineHeight: 0.95, textTransform: "uppercase" }}>
-                Respuestas entrando en tiempo real.
+                Respuestas registradas en campo.
               </h2>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function Home() {
                 Estudios preparados para edición, publicación y lectura de métricas.
               </p>
               <div className="divider" />
-              <div style={{ color: "var(--color-secondary)", fontWeight: 800 }}>Modo análisis</div>
+              <div style={{ color: "var(--color-secondary)", fontWeight: 800, textTransform: "uppercase" }}>Modo revisión</div>
             </div>
           </div>
         </motion.div>
