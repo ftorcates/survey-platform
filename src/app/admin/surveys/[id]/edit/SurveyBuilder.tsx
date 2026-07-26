@@ -103,23 +103,29 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       
       {/* Survey Header Edit */}
-      <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+      <div className="card" style={{ padding: '2rem', marginBottom: '0.5rem', borderLeft: '4px solid var(--color-primary)' }}>
         {!isEditingHeader ? (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text-main)' }}>{survey.title}</h1>
-                {survey.type === 'FIXED_SCALE' && (
-                  <span className="chip" style={{ color: 'var(--color-primary)' }}>
-                    <List size={14} /> Escala Fija
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '2rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 550px', minWidth: 0 }}>
+              {survey.type === 'FIXED_SCALE' && (
+                <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '0.85rem' }}>
+                  <span className="chip" style={{ color: 'var(--color-primary)', fontWeight: 600, border: '1px solid rgba(159, 232, 112, 0.35)', background: 'rgba(159, 232, 112, 0.08)' }}>
+                    <List size={15} /> Escala Fija
                   </span>
-                )}
-              </div>
-              <p style={{ color: 'var(--color-text-muted)' }}>{survey.description || "Sin descripción"}</p>
+                </div>
+              )}
+              <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-text-main)', margin: '0 0 1rem 0', lineHeight: 1.25 }}>
+                {survey.title}
+              </h1>
+              <p style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-line', lineHeight: 1.7, fontSize: '1.05rem', margin: 0 }}>
+                {survey.description || "Sin descripción"}
+              </p>
             </div>
-            <button onClick={() => setIsEditingHeader(true)} className="btn-secondary" style={{ padding: '0.5rem' }}>
-              <Edit3 size={18} /> Editar Info
-            </button>
+            <div style={{ flexShrink: 0 }}>
+              <button onClick={() => setIsEditingHeader(true)} className="btn-secondary" style={{ padding: '0.65rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                <Edit3 size={17} /> Editar Info
+              </button>
+            </div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
