@@ -42,7 +42,7 @@ export default async function AdminDashboard() {
       <div className="dashboard-grid">
         {surveys.length === 0 ? (
           <div className="card" style={{ padding: "3rem", textAlign: "center", gridColumn: "1 / -1" }}>
-            <div style={{ width: "4rem", height: "4rem", borderRadius: "var(--radius-lg)", margin: "0 auto 1rem", background: "rgba(159, 232, 112, 0.1)", display: "grid", placeItems: "center" }}>
+            <div style={{ width: "4rem", height: "4rem", borderRadius: "var(--radius-lg)", margin: "0 auto 1rem", background: "var(--color-accent-soft)", display: "grid", placeItems: "center" }}>
               <FileText size={24} color="var(--color-primary)" />
             </div>
             <h3 style={{ fontSize: "1.4rem", marginBottom: "0.6rem" }}>Todavía no has creado encuestas</h3>

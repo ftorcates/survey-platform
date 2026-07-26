@@ -3,6 +3,7 @@
   --font-heading: "DIN Alternate", "Avenir Next Condensed", "Arial Narrow", sans-serif;
   --color-primary: #9fe870;
   --color-primary-hover: #c5ff8a;
+  --color-primary-contrast: #17140f;
   --color-secondary: #ff6b57;
   --color-secondary-soft: rgba(255, 107, 87, 0.14);
   --color-cta: #65d5ff;
@@ -12,8 +13,23 @@
   --color-surface-strong: #242119;
   --color-surface-solid: #211f18;
   --color-bg: rgba(255, 255, 255, 0.055);
+  --color-bg-hover: rgba(255, 255, 255, 0.08);
+  --color-panel-soft: rgba(245, 239, 222, 0.045);
+  --color-chip-bg: rgba(255, 255, 255, 0.045);
+  --color-grid-line: rgba(255, 255, 255, 0.035);
+  --color-grid-line-strong: rgba(255, 255, 255, 0.028);
+  --color-noise-line: rgba(255, 255, 255, 0.025);
+  --color-signal-sweep: rgba(159, 232, 112, 0.08);
+  --color-signal-stripe: rgba(255, 255, 255, 0.045);
+  --color-accent-soft: rgba(159, 232, 112, 0.1);
+  --color-accent-border: rgba(159, 232, 112, 0.4);
+  --color-accent-focus: rgba(159, 232, 112, 0.12);
+  --color-cta-soft: rgba(101, 213, 255, 0.22);
+  --color-track: rgba(255, 255, 255, 0.08);
+  --color-body-gradient: linear-gradient(135deg, #16140f 0%, #231b16 44%, #111916 100%);
   --color-text-main: #f4efe4;
   --color-text-muted: #b5ac9b;
+  --color-placeholder: rgba(181, 172, 155, 0.7);
   --color-border: rgba(244, 239, 228, 0.13);
   --color-border-strong: rgba(244, 239, 228, 0.26);
   --color-error: #ff6b57;
@@ -32,6 +48,47 @@
   --transition-normal: 320ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+:root[data-theme="light"] {
+  --color-primary: #315f22;
+  --color-primary-hover: #244b18;
+  --color-primary-contrast: #fffdf7;
+  --color-secondary: #b94735;
+  --color-secondary-soft: rgba(185, 71, 53, 0.12);
+  --color-cta: #0b6f8f;
+  --color-background: #eee9dd;
+  --color-background-strong: #ded5c6;
+  --color-surface: rgba(255, 253, 247, 0.92);
+  --color-surface-strong: #fffdf7;
+  --color-surface-solid: #faf6ec;
+  --color-bg: rgba(18, 27, 22, 0.045);
+  --color-bg-hover: rgba(18, 27, 22, 0.075);
+  --color-panel-soft: rgba(255, 253, 247, 0.72);
+  --color-chip-bg: rgba(255, 253, 247, 0.8);
+  --color-grid-line: rgba(42, 50, 39, 0.08);
+  --color-grid-line-strong: rgba(42, 50, 39, 0.065);
+  --color-noise-line: rgba(42, 50, 39, 0.04);
+  --color-signal-sweep: rgba(49, 95, 34, 0.08);
+  --color-signal-stripe: rgba(42, 50, 39, 0.08);
+  --color-accent-soft: rgba(49, 95, 34, 0.1);
+  --color-accent-border: rgba(49, 95, 34, 0.38);
+  --color-accent-focus: rgba(49, 95, 34, 0.16);
+  --color-cta-soft: rgba(11, 111, 143, 0.16);
+  --color-track: rgba(18, 27, 22, 0.09);
+  --color-body-gradient: linear-gradient(135deg, #eee9dd 0%, #f7f1e2 48%, #dde7df 100%);
+  --color-text-main: #182118;
+  --color-text-muted: #52604f;
+  --color-placeholder: rgba(82, 96, 79, 0.68);
+  --color-border: rgba(24, 33, 24, 0.13);
+  --color-border-strong: rgba(24, 33, 24, 0.24);
+  --color-error: #b94735;
+  --color-success: #315f22;
+  --shadow-sm: 0 1px 0 rgba(24, 33, 24, 0.06);
+  --shadow-md: 0 18px 38px rgba(49, 42, 28, 0.11);
+  --shadow-lg: 0 28px 80px rgba(49, 42, 28, 0.17);
+  --shadow-glass: 0 24px 70px rgba(49, 42, 28, 0.14);
+  --shadow-glow: 0 0 0 1px rgba(49, 95, 34, 0.24), 0 18px 34px rgba(49, 95, 34, 0.12);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -45,9 +102,9 @@ body {
 
 body {
   background:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(135deg, #16140f 0%, #231b16 44%, #111916 100%);
+    linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-line-strong) 1px, transparent 1px),
+    var(--color-body-gradient);
   background-size: 40px 40px, 40px 40px, auto;
   color: var(--color-text-main);
   font-family: var(--font-sans);
@@ -64,8 +121,8 @@ body::before {
   background-image:
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.025) 0,
-      rgba(255, 255, 255, 0.025) 1px,
+      var(--color-noise-line) 0,
+      var(--color-noise-line) 1px,
       transparent 1px,
       transparent 3px
     );
@@ -117,7 +174,7 @@ textarea:focus-visible {
 }
 
 .soft-card {
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
@@ -187,7 +244,8 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border: 1px solid rgba(159, 232, 112, 0.16);
+  border: 1px solid var(--color-accent-border);
+  opacity: 0.42;
   border-radius: inherit;
 }
 
@@ -218,7 +276,7 @@ textarea:focus-visible {
 .signal-panel {
   position: relative;
   overflow: hidden;
-  background: rgba(245, 239, 222, 0.045);
+  background: var(--color-panel-soft);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1rem;
@@ -233,8 +291,8 @@ textarea:focus-visible {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, transparent 0%, rgba(159, 232, 112, 0.08) 50%, transparent 100%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 24px);
+    linear-gradient(90deg, transparent 0%, var(--color-signal-sweep) 50%, transparent 100%),
+    repeating-linear-gradient(90deg, var(--color-signal-stripe) 0 1px, transparent 1px 24px);
   opacity: 0.55;
 }
 
@@ -250,7 +308,7 @@ textarea:focus-visible {
   top: 18%;
   background: var(--color-primary);
   opacity: 0.55;
-  box-shadow: 0 0 26px rgba(159, 232, 112, 0.28);
+  box-shadow: 0 0 26px var(--color-accent-focus);
   animation: scan-y 5.8s cubic-bezier(0.32, 0.72, 0, 1) infinite;
 }
 
@@ -266,7 +324,7 @@ textarea:focus-visible {
 .pulse-bars span {
   display: block;
   min-height: 22px;
-  background: linear-gradient(180deg, var(--color-primary), rgba(101, 213, 255, 0.22));
+  background: linear-gradient(180deg, var(--color-primary), var(--color-cta-soft));
   animation: rise 2.6s cubic-bezier(0.32, 0.72, 0, 1) infinite alternate;
   animation-delay: calc(var(--i) * 80ms);
 }
@@ -334,7 +392,7 @@ textarea:focus-visible {
   padding: 0.35rem 0.55rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--color-chip-bg);
   color: var(--color-text-main);
   font-size: 0.78rem;
   font-weight: 750;
@@ -363,7 +421,7 @@ textarea:focus-visible {
   border-top: 0;
   border-bottom: 0;
   border-left: 0;
-  background: rgba(14, 13, 10, 0.9);
+  background: color-mix(in srgb, var(--color-background-strong) 92%, transparent);
   box-shadow: none;
 }
 
@@ -384,9 +442,9 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(159, 232, 112, 0.4);
+  border: 1px solid var(--color-accent-border);
   border-radius: var(--radius-lg);
-  background: rgba(159, 232, 112, 0.11);
+  background: var(--color-accent-soft);
   color: var(--color-primary);
 }
 
@@ -431,12 +489,12 @@ textarea:focus-visible {
 
 .nav-link:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--color-bg);
   color: var(--color-text-main);
 }
 
 .nav-link-active {
-  color: var(--color-background-strong);
+  color: var(--color-primary-contrast);
   background: var(--color-primary);
   border-color: transparent;
 }
@@ -479,7 +537,7 @@ textarea:focus-visible {
   padding: 0.78rem 0.9rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--color-bg);
   color: var(--color-text-main);
   outline: none;
   transition:
@@ -489,13 +547,13 @@ textarea:focus-visible {
 }
 
 .input-base::placeholder {
-  color: rgba(181, 172, 155, 0.7);
+  color: var(--color-placeholder);
 }
 
 .input-base:focus {
-  border-color: rgba(159, 232, 112, 0.62);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 3px rgba(159, 232, 112, 0.12);
+  border-color: var(--color-accent-border);
+  background: var(--color-bg-hover);
+  box-shadow: 0 0 0 3px var(--color-accent-focus);
 }
 
 .btn-primary,
@@ -523,7 +581,7 @@ textarea:focus-visible {
 .btn-primary {
   border: 1px solid transparent;
   background: var(--color-primary);
-  color: #17140f;
+  color: var(--color-primary-contrast);
   box-shadow: var(--shadow-glow);
 }
 
@@ -534,14 +592,14 @@ textarea:focus-visible {
 
 .btn-secondary {
   border: 1px solid var(--color-border-strong);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--color-bg);
   color: var(--color-text-main);
 }
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  border-color: rgba(159, 232, 112, 0.45);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-accent-border);
+  background: var(--color-bg-hover);
 }
 
 .btn-ghost {
@@ -570,7 +628,7 @@ textarea:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(14, 13, 10, 0.78);
+  background: color-mix(in srgb, var(--color-background-strong) 78%, transparent);
   backdrop-filter: blur(10px);
   z-index: 30;
 }
@@ -591,7 +649,7 @@ textarea:focus-visible {
   padding: 0.25rem 0.55rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--color-bg);
   color: var(--color-text-main);
   cursor: pointer;
   font-size: 0.75rem;
@@ -620,7 +678,7 @@ textarea:focus-visible {
 .progress-track {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-track);
   overflow: hidden;
 }
 
@@ -632,7 +690,7 @@ textarea:focus-visible {
   padding: 0.9rem 1rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--color-bg);
   cursor: pointer;
   transition:
     transform var(--transition-fast),
@@ -642,12 +700,73 @@ textarea:focus-visible {
 
 .question-option:hover {
   transform: translateX(4px);
-  border-color: rgba(159, 232, 112, 0.38);
+  border-color: var(--color-accent-border);
 }
 
 .question-option-active {
   border-color: var(--color-primary);
-  background: rgba(159, 232, 112, 0.1);
+  background: var(--color-accent-soft);
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 25;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.75rem 0.45rem 0.45rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-surface-solid) 88%, transparent);
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-accent-border);
+}
+
+.theme-toggle__track {
+  width: 2.4rem;
+  height: 1.45rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.16rem;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.theme-toggle__thumb {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  transition: transform var(--transition-normal);
+}
+
+:root[data-theme="light"] .theme-toggle__thumb {
+  transform: translateX(0.95rem);
+}
+
+.theme-toggle__label {
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 @keyframes scan-y {
@@ -756,5 +875,15 @@ textarea:focus-visible {
   .hero-title,
   .section-title {
     font-size: clamp(2.2rem, 15vw, 4rem);
+  }
+
+  .theme-toggle {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding-right: 0.45rem;
+  }
+
+  .theme-toggle__label {
+    display: none;
   }
 }
