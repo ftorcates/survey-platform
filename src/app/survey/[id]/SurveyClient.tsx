@@ -3,23 +3,24 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { startSurveyResponse, saveAnswer } from "./actions"
+import { submitCompletedSurvey } from "./actions"
 
 type StepState = 'PRESENTATION' | 'INSTRUCTIONS' | 'DEMOGRAPHICS' | 'QUESTIONS' | 'FINISHED';
+type DynamicAnswer = { questionId: string; textValue?: string; optionId?: string };
 
 export default function SurveyClient({ survey }: { survey: any }) {
   const [step, setStep] = useState<StepState>('PRESENTATION');
   const [currentStep, setCurrentStep] = useState(0); // Question index in dynamic flow
-  const [responseId, setResponseId] = useState<string | null>(null);
 
   // Demographics state
   const [ageGroup, setAgeGroup] = useState("");
   const [sex, setSex] = useState("");
 
-  // Current answer state (Dynamic flow)
+  // Current & accumulated answer state (Dynamic flow)
   const [textAnswer, setTextAnswer] = useState("");
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [selectedMultipleOptions, setSelectedMultipleOptions] = useState<string[]>([]);
+  const [dynamicAnswers, setDynamicAnswers] = useState<DynamicAnswer[]>([]);
 
   // Matrix answer state (Fixed Scale flow)
   const [matrixAnswers, setMatrixAnswers] = useState<Record<string, string>>({});
@@ -52,50 +53,50 @@ export default function SurveyClient({ survey }: { survey: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStart = async () => {
-    setIsSubmitting(true);
-    const rid = await startSurveyResponse(survey.id, { ageGroup, sex });
-    setResponseId(rid);
-    setIsSubmitting(false);
-
     if (survey.questions && survey.questions.length > 0) {
       setStep('QUESTIONS');
       setCurrentStep(0);
     } else {
+      setIsSubmitting(true);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex }, []);
+      setIsSubmitting(false);
       setStep('FINISHED');
     }
   };
 
   const handleNextQuestion = async () => {
-    if (!responseId) return;
-
     const currentQ = survey.questions[currentStep];
     let nextQId = currentQ.nextQuestionId;
 
-    setIsSubmitting(true);
-
+    const currentNewAnswers: DynamicAnswer[] = [];
     if (currentQ.type === 'TEXT') {
-      await saveAnswer(responseId, currentQ.id, textAnswer, undefined);
+      currentNewAnswers.push({ questionId: currentQ.id, textValue: textAnswer });
     } else if (currentQ.type === 'SINGLE_CHOICE') {
-      await saveAnswer(responseId, currentQ.id, undefined, selectedOptionId || undefined);
-      const selectedOpt = currentQ.options.find((o: any) => o.id === selectedOptionId);
+      currentNewAnswers.push({ questionId: currentQ.id, optionId: selectedOptionId || undefined });
+      const selectedOpt = currentQ.options?.find((o: any) => o.id === selectedOptionId);
       if (selectedOpt && selectedOpt.nextQuestionId) {
         nextQId = selectedOpt.nextQuestionId; // Branching logic overrides question sequence!
       }
     } else if (currentQ.type === 'MULTIPLE_CHOICE') {
       for (const optId of selectedMultipleOptions) {
-        await saveAnswer(responseId, currentQ.id, undefined, optId);
+        currentNewAnswers.push({ questionId: currentQ.id, optionId: optId });
       }
     }
 
-    setIsSubmitting(false);
+    const allAccumulated = [...dynamicAnswers, ...currentNewAnswers];
+    setDynamicAnswers(allAccumulated);
 
     // Reset answer state
     setTextAnswer("");
     setSelectedOptionId(null);
     setSelectedMultipleOptions([]);
 
-    // Branching: Find the next question index if a specific nextQuestionId is set
-    if (nextQId === 'END') {
+    // Branching & Completion check
+    const isEndReached = nextQId === 'END' || (!nextQId && currentStep + 1 >= survey.questions.length);
+    if (isEndReached) {
+      setIsSubmitting(true);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex }, allAccumulated);
+      setIsSubmitting(false);
       setStep('FINISHED');
       return;
     }
@@ -112,18 +113,20 @@ export default function SurveyClient({ survey }: { survey: any }) {
     if (currentStep + 1 < survey.questions.length) {
       setCurrentStep(currentStep + 1);
     } else {
+      setIsSubmitting(true);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex }, allAccumulated);
+      setIsSubmitting(false);
       setStep('FINISHED');
     }
   };
 
   const handleSubmitMatrix = async () => {
-    if (!responseId) return;
     setIsSubmitting(true);
-    for (const q of survey.questions) {
-      if (matrixAnswers[q.id]) {
-        await saveAnswer(responseId, q.id, undefined, matrixAnswers[q.id]);
-      }
-    }
+    const formattedAnswers = Object.entries(matrixAnswers).map(([questionId, optionId]) => ({
+      questionId,
+      optionId
+    }));
+    await submitCompletedSurvey(survey.id, { ageGroup, sex }, formattedAnswers);
     setIsSubmitting(false);
     setStep('FINISHED');
   };
