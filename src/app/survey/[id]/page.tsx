@@ -11,6 +11,9 @@ export default async function SurveyPage({ params }: { params: Promise<{ id: str
       options: {
         orderBy: { id: 'asc' }
       },
+      blocks: {
+        orderBy: { order: 'asc' }
+      },
       questions: {
         orderBy: { order: 'asc' },
         include: {
