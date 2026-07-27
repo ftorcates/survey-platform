@@ -199,6 +199,29 @@ export default function MetricsClient({ survey }: { survey: any }) {
       }
     });
 
+    if (survey.type === 'FIXED_SCALE' && survey.options) {
+      const globalSheet = workbook.addWorksheet('Frecuencia Absoluta Acumulada', { views: [{ state: 'frozen', ySplit: 1 }] });
+      const globalHeader = globalSheet.addRow(['Opción de la Escala', 'Puntaje / Valor', 'Frecuencia Absoluta Acumulada', 'Porcentaje Global']);
+      globalHeader.font = { bold: true };
+      globalSheet.getColumn(1).width = 35;
+      globalSheet.getColumn(2).width = 18;
+      globalSheet.getColumn(3).width = 28;
+      globalSheet.getColumn(4).width = 20;
+
+      const totalGlobalAnswers = survey.questions.reduce((acc: number, q: any) => acc + q.answers.length, 0);
+      survey.options.forEach((opt: any, idx: number) => {
+        const count = survey.questions.reduce((acc: number, q: any) => acc + q.answers.filter((a: any) => a.optionId === opt.id).length, 0);
+        const percent = totalGlobalAnswers > 0 ? ((count / totalGlobalAnswers) * 100).toFixed(1) + '%' : '0%';
+        const row = globalSheet.addRow([opt.text, opt.value ?? (idx + 1), count, percent]);
+        row.eachCell((cell) => {
+          cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        });
+      });
+      globalSheet.addRow([]);
+      const totalRow = globalSheet.addRow(['Total de Respuestas Evaluadas:', '', totalGlobalAnswers, '100%']);
+      totalRow.font = { bold: true };
+    }
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blob, `Resultados_${survey.title.replace(/[^a-z0-9]/gi, '_')}.xlsx`);
@@ -267,42 +290,119 @@ export default function MetricsClient({ survey }: { survey: any }) {
         </div>
       </div>
 
-      {/* Global Fixed Scale Metrics */}
-      {survey.type === 'FIXED_SCALE' && survey.options && (
-        <>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginTop: '2rem' }}>Resumen General (Toda la Encuesta)</h2>
-          <div id="chart-global" className="card" style={{ padding: '1.5rem', height: '400px', minWidth: 0, position: 'relative' }}>
-            <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-              <button onClick={() => downloadImage('chart-global', 'png', 'resumen_general')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-              <button onClick={() => downloadImage('chart-global', 'jpeg', 'resumen_general')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+      {/* Global Fixed Scale Metrics (Frecuencia Absoluta Acumulada) */}
+      {survey.type === 'FIXED_SCALE' && survey.options && (() => {
+        const totalGlobalAnswers = survey.questions.reduce((acc: number, q: any) => acc + q.answers.length, 0);
+        const numOptions = survey.options.length;
+        const globalCounts = survey.options.map((opt: any, idx: number) => {
+          const count = survey.questions.reduce((acc: number, q: any) => acc + q.answers.filter((a: any) => a.optionId === opt.id).length, 0);
+          const pct = totalGlobalAnswers > 0 ? (count / totalGlobalAnswers) * 100 : 0;
+          return { id: opt.id, text: opt.text, value: opt.value ?? (idx + 1), count, pct, name: opt.text };
+        });
+
+        let highCount = 0;
+        let midCount = 0;
+        let lowCount = 0;
+        const midIdx = Math.floor(numOptions / 2);
+        const isEven = numOptions % 2 === 0;
+
+        globalCounts.forEach((o: any, idx: number) => {
+          if (isEven) {
+            if (idx < numOptions / 2) lowCount += o.count;
+            else highCount += o.count;
+          } else {
+            if (idx < midIdx) lowCount += o.count;
+            else if (idx === midIdx) midCount += o.count;
+            else highCount += o.count;
+          }
+        });
+
+        const highPct = totalGlobalAnswers > 0 ? (highCount / totalGlobalAnswers) * 100 : 0;
+        const midPct = totalGlobalAnswers > 0 ? (midCount / totalGlobalAnswers) * 100 : 0;
+        const lowPct = totalGlobalAnswers > 0 ? (lowCount / totalGlobalAnswers) * 100 : 0;
+
+        let insightTitle = "Evaluación Equilibrada / Dispersa";
+        let insightColor = "var(--color-primary, #3b82f6)";
+        let insightDesc = "Las respuestas se distribuyen de manera heterogénea en los diferentes niveles de la escala, sin inclinarse marcadamente hacia ningún extremo.";
+
+        if (highPct >= 50) {
+          insightTitle = "Alta Tendencia a la Benevolencia / Acuerdo";
+          insightColor = "#10B981";
+          insightDesc = `El ${highPct.toFixed(1)}% del total general de selecciones se concentra en las opciones de mayor valoración (4 y 5), revelando una marcada inclinación positiva o benevolente en los participantes.`;
+        } else if (lowPct >= 40) {
+          insightTitle = "Tendencia al Descontento / Criticidad";
+          insightColor = "#EF4444";
+          insightDesc = `El ${lowPct.toFixed(1)}% de las respuestas acumuladas recae en las opciones más bajas de la escala, evidenciando una postura eminentemente crítica o de desacuerdo generalizado.`;
+        } else if (midPct >= 35) {
+          insightTitle = "Alta Neutralidad / Imparcialidad";
+          insightColor = "#F59E0B";
+          insightDesc = `Un notable ${midPct.toFixed(1)}% de las selecciones totales apunta al punto neutral de la escala, lo cual puede indicar cautela, indecisión o moderación entre los encuestados.`;
+        }
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '2rem' }}>
+            <div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Frecuencia Absoluta Acumulada</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.925rem', marginTop: '0.25rem' }}>
+                Suma consolidada de todas las respuestas emitidas en todas las preguntas del estudio para medir el comportamiento general frente a la escala.
+              </p>
             </div>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', textAlign: 'center' }}>Frecuencia de Opciones Globales</h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={[
-                  ...survey.options.map((opt: any) => ({
-                    name: opt.text,
-                    value: survey.questions.reduce((acc: number, q: any) => acc + q.answers.filter((a: any) => a.optionId === opt.id).length, 0)
-                  })),
-                  {
-                    name: 'No Responde',
-                    value: (totalResponses * survey.questions.length) - survey.questions.reduce((acc: number, q: any) => acc + q.answers.length, 0)
-                  }
-                ].filter(d => d.name !== 'No Responde' || d.value > 0)} 
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
-                <Bar dataKey="value" fill="var(--color-cta)" radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 600 }} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+
+            {/* Tarjeta de Insight de Comportamiento */}
+            <div className="card" style={{ padding: '1.5rem', borderLeft: `5px solid ${insightColor}`, background: 'var(--color-bg-secondary, rgba(255, 255, 255, 0.04))', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.75rem', lineHeight: 1 }}>💡</span>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Insight de Comportamiento Global
+                </span>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-main)', marginTop: '0.2rem', marginBottom: '0.4rem' }}>
+                  {insightTitle}
+                </h3>
+                <p style={{ fontSize: '0.95rem', color: 'var(--color-text-main)', margin: 0, lineHeight: 1.5 }}>
+                  {insightDesc} (De un total de <strong>{totalGlobalAnswers}</strong> evaluaciones acumuladas en toda la encuesta).
+                </p>
+              </div>
+            </div>
+
+            {/* Cajas de KPI para cada opción */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              {globalCounts.map((opt: any) => (
+                <div key={opt.id} className="card" style={{ padding: '1.25rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                  <span style={{ fontSize: '0.825rem', color: 'var(--color-text-muted)', display: 'block', fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    {opt.text}
+                  </span>
+                  <p style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text-main)', margin: '0.5rem 0 0.25rem' }}>
+                    {opt.count} <span style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--color-text-muted)' }}>veces</span>
+                  </p>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-cta, #10B981)' }}>
+                    {opt.pct.toFixed(1)}% del total
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Gráfico de Barras Consolidado */}
+            <div id="chart-global" className="card" style={{ padding: '1.75rem', height: '420px', minWidth: 0, position: 'relative' }}>
+              <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                <button onClick={() => downloadImage('chart-global', 'png', 'frecuencia_absoluta_acumulada')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                <button onClick={() => downloadImage('chart-global', 'jpeg', 'frecuencia_absoluta_acumulada')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+              </div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución de Frecuencia Absoluta Acumulada</h3>
+              <ResponsiveContainer width="100%" height="85%">
+                <BarChart data={globalCounts} margin={{ top: 20, right: 30, left: 20, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 13, fontWeight: 600 }} />
+                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                  <Tooltip formatter={(val: any) => [`${val ?? 0} veces`, 'Frecuencia']} cursor={{ fill: 'rgba(0,0,0,0.04)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-lg)' }} />
+                  <Bar dataKey="count" fill="#10B981" radius={[6, 6, 0, 0]}>
+                    <LabelList dataKey="count" position="top" formatter={(val: any) => `${val ?? ''}`} style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 700 }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </>
-      )}
+        );
+      })()}
 
       {/* Questions Breakdown */}
       <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginTop: '2rem' }}>Respuestas por Pregunta</h2>

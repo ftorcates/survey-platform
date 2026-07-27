@@ -1,0 +1,11 @@
+{
+  "name": "sondar-promo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.7.75 preview",
+    "check": "npx --yes hyperframes@0.7.75 check",
+    "render": "npx --yes hyperframes@0.7.75 render",
+    "publish": "npx --yes hyperframes@0.7.75 publish"
+  }
+}

@@ -1,0 +1,17 @@
+[div] Survey Platform
+[h1] Encuestas que se comportan como rutas vivas.
+[p] Diseña flujos dinámicos, publica enlaces y lee audiencias desde un mapa operativo donde cada pregunta, bloque y respuesta ocupa su lugar.
+[button] Iniciar sesión
+[button] Ver demo
+[div] Rutas
+[div] Respuestas
+[div] 2.4k
+[div] Nodos activos
+[span] Mapa de encuesta
+[strong] Presentación
+[div] Contexto, organización, instrucciones y datos demográficos cuando aplican.
+[strong] Bifurcación
+[div] Una respuesta puede abrir una ruta distinta sin romper el flujo.
+[strong] Lectura
+[div] Las respuestas llegan al dashboard y alimentan audiencias agregadas.
+[span] Mapa noche

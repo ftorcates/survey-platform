@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #000;
+      }
+      body { font-family: "Aptos", "Avenir Next", "Segoe UI", sans-serif; }
+      @font-face { font-family: "Aptos"; src: local("Aptos"); font-weight: 400 820; }
+      @font-face { font-family: "Aptos Display"; src: local("Aptos Display"); font-weight: 700 900; }
+      @font-face { font-family: "IBM Plex Mono"; src: local("IBM Plex Mono"); font-weight: 400 900; }
+      @font-face { font-family: "SFMono-Regular"; src: local("SFMono-Regular"); font-weight: 400 900; }
+      code,
+      pre,
+      .monospace {
+        font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+      }
+      :root {
+        --bg: #07101f;
+        --bg-2: #101622;
+        --panel: rgba(18, 27, 45, 0.82);
+        --panel-strong: #121b2d;
+        --ink: #f7fbff;
+        --muted: #aab8ca;
+        --blue: #2f6df6;
+        --blue-soft: #6ea3ff;
+        --teal: #23b7a4;
+        --signal: #00e5d4;
+        --gold: #d99b2b;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        color: var(--ink);
+        background: #07101f;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .scene-ground {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 15% 18%, rgba(47, 109, 246, 0.28), transparent 360px),
+          radial-gradient(circle at 86% 20%, rgba(35, 183, 164, 0.22), transparent 420px),
+          radial-gradient(circle at 50% 115%, rgba(217, 155, 43, 0.12), transparent 520px),
+          linear-gradient(135deg, #07101f 0%, #101622 52%, #071717 100%);
+      }
+      .scene-ground.light {
+        background:
+          radial-gradient(circle at 20% 18%, rgba(47, 109, 246, 0.13), transparent 360px),
+          radial-gradient(circle at 76% 22%, rgba(0, 229, 212, 0.15), transparent 420px),
+          linear-gradient(135deg, #f8fbff 0%, #edf5ff 55%, #e7fff9 100%);
+      }
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(179, 205, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(179, 205, 255, 0.08) 1px, transparent 1px);
+        background-size: 92px 92px;
+        mask-image: radial-gradient(circle at 50% 48%, #000 0%, rgba(0,0,0,.72) 48%, transparent 82%);
+      }
+      .noise {
+        position: absolute;
+        inset: 0;
+        opacity: .19;
+        background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px);
+        mix-blend-mode: overlay;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(8px);
+        opacity: .8;
+      }
+      .orb-a { width: 280px; height: 280px; background: rgba(47,109,246,.2); left: 104px; top: 118px; }
+      .orb-b { width: 240px; height: 240px; background: rgba(0,229,212,.18); right: 160px; top: 210px; }
+      .orb-c { width: 330px; height: 330px; background: rgba(217,155,43,.12); right: 540px; bottom: -90px; }
+      .kicker {
+        display: inline-flex;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 20px;
+        border: 2px solid rgba(179,205,255,.2);
+        border-radius: 999px;
+        color: var(--blue-soft);
+        background: rgba(18,27,45,.74);
+        letter-spacing: .24em;
+        text-transform: uppercase;
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--signal);
+        box-shadow: 0 0 30px rgba(0,229,212,.75);
+      }
+      h1, h2 {
+        font-family: "Aptos Display", "Avenir Next", "Segoe UI", sans-serif;
+        letter-spacing: -.065em;
+        line-height: .9;
+      }
+      h1 { font-size: 132px; font-weight: 820; max-width: 1010px; }
+      h2 { font-size: 106px; font-weight: 820; }
+      p {
+        color: var(--muted);
+        font-size: 34px;
+        line-height: 1.25;
+      }
+      .big-line { display: block; }
+      .scene-content {
+        position: absolute;
+        inset: 0;
+        padding: 92px 112px;
+      }
+      .logo-card {
+        position: absolute;
+        left: 106px;
+        top: 390px;
+        width: 820px;
+        height: 230px;
+        border-radius: 42px;
+        overflow: hidden;
+        border: 2px solid rgba(179,205,255,.18);
+        box-shadow: 0 42px 120px rgba(0,0,0,.38);
+      }
+      .logo-card img { width: 100%; height: 100%; object-fit: cover; }
+      .tagline {
+        position: absolute;
+        left: 108px;
+        bottom: 120px;
+        width: 780px;
+        font-size: 74px;
+        line-height: .98;
+        letter-spacing: -.05em;
+        font-weight: 820;
+      }
+      .radar {
+        position: absolute;
+        right: 110px;
+        top: 110px;
+        width: 820px;
+        height: 820px;
+        border-radius: 50%;
+      }
+      .ring {
+        position: absolute;
+        inset: var(--inset);
+        border-radius: 50%;
+        border: 3px solid rgba(110,163,255,.18);
+      }
+      .sweep {
+        position: absolute;
+        inset: 52px;
+        border-radius: 50%;
+        background: conic-gradient(from 16deg, rgba(0,229,212,.0), rgba(0,229,212,.35), rgba(47,109,246,.0) 23%);
+        mask-image: radial-gradient(circle, transparent 0 14%, #000 15% 100%);
+      }
+      .node {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--signal);
+        box-shadow: 0 0 34px rgba(0,229,212,.8);
+      }
+      .node.n1 { left: 110px; top: 380px; }
+      .node.n2 { left: 348px; top: 190px; background: var(--blue-soft); }
+      .node.n3 { right: 150px; top: 330px; background: var(--gold); }
+      .node.n4 { left: 440px; bottom: 120px; }
+      .flow-map {
+        position: absolute;
+        right: 112px;
+        top: 146px;
+        width: 840px;
+        height: 760px;
+        border: 2px solid rgba(179,205,255,.18);
+        border-radius: 56px;
+        background: rgba(18,27,45,.66);
+        box-shadow: 0 46px 120px rgba(0,0,0,.35);
+      }
+      .route-svg {
+        position: absolute;
+        inset: 78px 70px 40px 70px;
+        overflow: visible;
+      }
+      .route-path {
+        fill: none;
+        stroke: var(--blue-soft);
+        stroke-width: 12;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 1180;
+        stroke-dashoffset: 1180;
+      }
+      .route-path.alt { stroke: var(--signal); stroke-width: 10; }
+      .route-path.gold { stroke: var(--gold); stroke-width: 10; }
+      .map-node {
+        position: absolute;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #0b1628;
+        border: 6px solid var(--blue-soft);
+        color: var(--ink);
+        font-size: 24px;
+        font-weight: 820;
+      }
+      .map-copy {
+        position: absolute;
+        left: 112px;
+        top: 175px;
+        width: 730px;
+      }
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        margin-top: 50px;
+      }
+      .pill {
+        padding: 18px 24px;
+        border-radius: 999px;
+        border: 2px solid rgba(179,205,255,.22);
+        background: rgba(235,244,255,.08);
+        font-size: 26px;
+        font-weight: 760;
+      }
+      .product-shot {
+        position: absolute;
+        right: 96px;
+        top: 112px;
+        width: 1160px;
+        height: 654px;
+        border-radius: 46px;
+        overflow: hidden;
+        border: 3px solid rgba(179,205,255,.22);
+        box-shadow: 0 54px 150px rgba(0,0,0,.46);
+        background: #101622;
+      }
+      .product-shot img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .scanner {
+        position: absolute;
+        top: 112px;
+        right: 96px;
+        width: 1160px;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, var(--signal), transparent);
+        box-shadow: 0 0 28px rgba(0,229,212,.8);
+      }
+      .copy-panel {
+        position: absolute;
+        left: 92px;
+        bottom: 112px;
+        width: 710px;
+        padding: 42px;
+        border-radius: 42px;
+        border: 2px solid rgba(179,205,255,.22);
+        background: rgba(7,16,31,.78);
+        box-shadow: 0 28px 90px rgba(0,0,0,.34);
+      }
+      .copy-panel h2 { font-size: 66px; margin-bottom: 22px; }
+      .chip-stack {
+        position: absolute;
+        right: 164px;
+        bottom: 96px;
+        display: flex;
+        gap: 18px;
+      }
+      .chip {
+        padding: 18px 24px;
+        border-radius: 22px;
+        border: 2px solid rgba(179,205,255,.26);
+        background: rgba(18,27,45,.88);
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .audience-board {
+        position: absolute;
+        left: 110px;
+        top: 144px;
+        width: 1020px;
+        height: 780px;
+        border-radius: 58px;
+        border: 2px solid rgba(179,205,255,.2);
+        background: rgba(18,27,45,.74);
+        padding: 58px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 150px 1fr 86px;
+        gap: 28px;
+        align-items: center;
+        margin: 32px 0;
+        font-size: 28px;
+        color: var(--muted);
+      }
+      .track {
+        height: 24px;
+        border-radius: 999px;
+        background: rgba(235,244,255,.12);
+        overflow: hidden;
+      }
+      .fill {
+        width: var(--w);
+        height: 100%;
+        border-radius: inherit;
+        transform-origin: left center;
+        background: linear-gradient(90deg, var(--signal), var(--blue-soft));
+      }
+      .insight-card {
+        position: absolute;
+        right: 112px;
+        top: 230px;
+        width: 560px;
+        padding: 48px;
+        border-radius: 46px;
+        background: #f7fbff;
+        color: #07101f;
+        box-shadow: 0 48px 140px rgba(0,0,0,.38);
+      }
+      .insight-card h2 { color: #07101f; font-size: 70px; }
+      .insight-card p { color: #29405f; margin-top: 26px; }
+      .metric {
+        margin-top: 44px;
+        font-size: 120px;
+        letter-spacing: -.07em;
+        font-weight: 820;
+        color: #2c66e7;
+      }
+      .final-logo {
+        position: absolute;
+        left: 310px;
+        top: 350px;
+        width: 1300px;
+        height: 392px;
+        border-radius: 56px;
+        overflow: hidden;
+        box-shadow: 0 40px 120px rgba(47,109,246,.16);
+      }
+      .final-logo img { width: 100%; height: 100%; object-fit: cover; }
+      .final-line {
+        position: absolute;
+        left: 360px;
+        bottom: 170px;
+        color: #07101f;
+        font-size: 48px;
+        font-weight: 760;
+        letter-spacing: -.02em;
+      }
+      .launch-mark {
+        position: absolute;
+        right: 92px;
+        top: 74px;
+        color: #29405f;
+        font-size: 18px;
+        letter-spacing: .22em;
+        text-transform: uppercase;
+        font-weight: 820;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <section id="scene-01" class="clip" data-start="0" data-duration="6" data-track-index="1">
+        <div class="scene-ground"></div><div class="grid"></div><div class="noise"></div>
+        <div class="orb orb-a"></div><div class="orb orb-b"></div><div class="orb orb-c" data-layout-allow-overflow></div>
+        <div class="scene-content">
+          <div id="s01-kicker" class="kicker"><span class="dot"></span> lanzamiento producto</div>
+          <div id="s01-logo" class="logo-card"><img src="assets/sondar-logo-dark.jpeg" alt="Sondar" /></div>
+          <div id="s01-tagline" class="tagline">Respuestas que revelan. Senales que guian.</div>
+          <div id="s01-radar" class="radar">
+            <div class="ring" style="--inset: 20px"></div>
+            <div class="ring" style="--inset: 120px"></div>
+            <div class="ring" style="--inset: 220px"></div>
+            <div class="ring" style="--inset: 320px"></div>
+            <div class="sweep"></div>
+            <span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-02" class="clip" data-start="6" data-duration="6" data-track-index="1">
+        <div class="scene-ground"></div><div class="grid"></div><div class="noise"></div>
+        <div class="scene-content">
+          <div id="s02-copy" class="map-copy">
+            <div class="kicker"><span class="dot"></span> cartografia de flujos</div>
+            <h1 style="margin-top:34px"><span class="big-line">Del formulario</span><span class="big-line">al mapa vivo.</span></h1>
+            <p style="margin-top:34px; max-width:720px">Disena estudios, publica enlaces y deja que cada respuesta abra la siguiente ruta.</p>
+            <div class="pill-row"><span class="pill">Home</span><span class="pill">Login Google</span><span class="pill">Dashboard</span><span class="pill">Encuesta publica</span></div>
+          </div>
+          <div id="s02-map" class="flow-map">
+            <svg class="route-svg" viewBox="0 0 700 560">
+              <path id="s02-path-main" class="route-path" d="M70 290 C210 290 260 290 350 290 C470 290 560 290 640 290" />
+              <path id="s02-path-alt" class="route-path alt" d="M350 290 C390 232 470 182 570 128" />
+              <path id="s02-path-gold" class="route-path gold" d="M350 290 C410 340 472 404 570 470" />
+            </svg>
+            <div id="s02-node-01" class="map-node" style="left:70px; top:318px">01</div>
+            <div id="s02-node-02" class="map-node" style="left:370px; top:318px; border-color:var(--signal)">02</div>
+            <div id="s02-node-03" class="map-node" style="right:92px; top:154px">03</div>
+            <div id="s02-node-04" class="map-node" style="right:92px; bottom:132px; border-color:var(--gold)">04</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-03" class="clip" data-start="12" data-duration="6" data-track-index="1">
+        <div class="scene-ground"></div><div class="grid"></div><div class="noise"></div>
+        <div id="s03-shot" class="product-shot"><img src="capture/screenshots/scroll-000.png" alt="Home de Sondar" data-layout-allow-overflow /></div>
+        <div id="s03-scanner" class="scanner"></div>
+        <div id="s03-panel" class="copy-panel">
+          <div class="kicker"><span class="dot"></span> producto real</div>
+          <h2>Encuestas de principio a fin.</h2>
+          <p>Home, OAuth con Google, dashboard, audiencias, configuracion y encuestas publicas bajo una misma direccion visual.</p>
+        </div>
+        <div id="s03-chips" class="chip-stack"><span class="chip">Crear</span><span class="chip">Publicar</span><span class="chip">Medir</span></div>
+      </section>
+
+      <section id="scene-04" class="clip" data-start="18" data-duration="6" data-track-index="1">
+        <div class="scene-ground"></div><div class="grid"></div><div class="noise"></div>
+        <div id="s04-board" class="audience-board">
+          <div class="kicker"><span class="dot"></span> lectura agregada</div>
+          <h2 style="margin-top:34px">Audiencias que dejan senales.</h2>
+          <div style="margin-top:50px">
+            <div class="bar-row"><span>18-24</span><div class="track"><div class="fill" style="--w:42%"></div></div><strong>28%</strong></div>
+            <div class="bar-row"><span>25-34</span><div class="track"><div class="fill" style="--w:68%"></div></div><strong>41%</strong></div>
+            <div class="bar-row"><span>35-44</span><div class="track"><div class="fill" style="--w:31%"></div></div><strong>19%</strong></div>
+            <div class="bar-row"><span>45+</span><div class="track"><div class="fill" style="--w:22%"></div></div><strong>12%</strong></div>
+          </div>
+        </div>
+        <div id="s04-insight" class="insight-card">
+        <div class="kicker" style="background:#eaf3ff;color:#2c66e7;border-color:#cfe1ff"><span class="dot"></span> insight</div>
+          <h2 style="margin-top:32px">De respuestas dispersas a decision.</h2>
+          <p>Cruza resultados, detecta patrones y comparte metricas sin perder el contexto del estudio.</p>
+          <div class="metric">2.4k</div>
+        </div>
+      </section>
+
+      <section id="scene-05" class="clip" data-start="24" data-duration="6" data-track-index="1">
+        <div class="scene-ground light"></div><div class="grid" style="opacity:.42"></div><div class="noise" style="opacity:.08"></div>
+        <div class="launch-mark">respuestas que revelan. senales que guian.</div>
+        <div id="s05-logo" class="final-logo"><img src="assets/sondar-logo-light.jpeg" alt="Sondar" /></div>
+        <div id="s05-line" class="final-line">Sondar convierte encuestas en direccion operativa.</div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.from("#s01-kicker", { opacity: 0, y: -24, duration: .55, ease: "power3.out" }, .2)
+        .from("#s01-logo", { opacity: 0, x: -70, scale: .96, duration: .8, ease: "power3.out" }, .55)
+        .from("#s01-tagline", { opacity: 0, y: 54, duration: .8, ease: "power4.out" }, 1.0)
+        .from("#s01-radar", { opacity: 0, scale: .82, rotation: -12, duration: 1.0, ease: "expo.out" }, .65)
+        .to("#s01-radar .sweep", { rotation: 380, duration: 5.2, ease: "none" }, .45)
+        .to("#s01-radar .ring", { scale: 1.08, opacity: .52, duration: 4.8, stagger: .18, ease: "sine.inOut" }, .75)
+        .to("#scene-01 .orb", { x: 34, y: -22, scale: 1.08, duration: 5.2, stagger: .24, ease: "sine.inOut" }, .4);
+
+      tl.from("#s02-copy", { opacity: 0, x: -90, duration: .75, ease: "power4.out" }, 6.15)
+        .from("#s02-map", { opacity: 0, x: 90, scale: .94, duration: .85, ease: "power4.out" }, 6.35)
+        .to("#s02-path-main", { strokeDashoffset: 0, duration: 1.15, ease: "power2.inOut" }, 7.1)
+        .to("#s02-path-alt", { strokeDashoffset: 0, duration: .9, ease: "power2.inOut" }, 7.75)
+        .to("#s02-path-gold", { strokeDashoffset: 0, duration: .9, ease: "power2.inOut" }, 8.15)
+        .from("#s02-map .map-node", { opacity: 0, scale: .4, duration: .45, stagger: .16, ease: "back.out(1.9)" }, 7.35)
+        .from("#s02-copy .pill", { opacity: 0, y: 24, duration: .45, stagger: .08, ease: "power3.out" }, 8.45)
+        .to("#s02-map", { y: -18, duration: 2.8, ease: "sine.inOut" }, 9.1);
+
+      tl.from("#s03-shot", { opacity: 0, x: 120, scale: .92, duration: .9, ease: "power4.out" }, 12.15)
+        .from("#s03-panel", { opacity: 0, x: -80, y: 40, duration: .8, ease: "power4.out" }, 12.55)
+        .from("#s03-chips .chip", { opacity: 0, y: 36, duration: .42, stagger: .12, ease: "back.out(1.8)" }, 13.25)
+        .fromTo("#s03-scanner", { opacity: 0, y: 0 }, { opacity: 1, y: 650, duration: 2.2, ease: "power2.inOut" }, 13.0)
+        .to("#s03-scanner", { opacity: 0, duration: .35 }, 15.25)
+        .to("#s03-shot img", { scale: 1.08, x: -46, duration: 5.3, ease: "sine.inOut" }, 12.4);
+
+      tl.from("#s04-board", { opacity: 0, x: -80, scale: .96, duration: .8, ease: "power4.out" }, 18.15)
+        .from("#s04-insight", { opacity: 0, x: 90, rotation: 2, duration: .85, ease: "power4.out" }, 18.65)
+        .fromTo("#s04-board .fill", { scaleX: 0 }, { scaleX: 1, duration: .9, stagger: .18, ease: "power3.out" }, 19.25)
+        .from("#s04-insight .metric", { opacity: 0, y: 40, scale: .86, duration: .65, ease: "back.out(1.7)" }, 20.3)
+        .to("#s04-insight", { y: -16, duration: 2.5, ease: "sine.inOut" }, 21.0);
+
+      tl.from("#s05-logo", { opacity: 0, y: 80, scale: .94, duration: .9, ease: "power4.out" }, 24.25)
+        .from("#s05-line", { opacity: 0, y: 36, duration: .7, ease: "power3.out" }, 25.1)
+        .from(".launch-mark", { opacity: 0, x: 40, duration: .6, ease: "power3.out" }, 25.45)
+        .to("#s05-logo", { scale: 1.018, duration: 3.8, ease: "sine.inOut" }, 25.2);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

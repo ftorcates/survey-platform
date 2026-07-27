@@ -1,0 +1,61 @@
+{
+  "summary": {
+    "webAnimations": 1,
+    "cssDeclarations": 5,
+    "scrollTargets": 0,
+    "cdpAnimations": 8,
+    "canvases": 0
+  },
+  "namedAnimations": [
+    "route-pulse"
+  ],
+  "scrollTriggeredElements": 0,
+  "representativeAnimations": [
+    {
+      "type": "CSSAnimation",
+      "playState": "running",
+      "animationName": "route-pulse",
+      "targetSelector": "span.route-line.route-line-main",
+      "targetRect": {
+        "x": 1018.578125,
+        "y": 547.640625,
+        "width": 507.703125,
+        "height": 10,
+        "top": 547.640625,
+        "right": 1526.28125,
+        "bottom": 557.640625,
+        "left": 1018.578125
+      },
+      "keyframes": [
+        {
+          "offset": 0,
+          "easing": "cubic-bezier(0.32, 0.72, 0, 1)",
+          "composite": "auto",
+          "filter": "saturate(0.95)",
+          "computedOffset": 0
+        },
+        {
+          "offset": 0.5,
+          "easing": "cubic-bezier(0.32, 0.72, 0, 1)",
+          "composite": "auto",
+          "filter": "saturate(1.45) brightness(1.08)",
+          "computedOffset": 0.5
+        },
+        {
+          "offset": 1,
+          "easing": "cubic-bezier(0.32, 0.72, 0, 1)",
+          "composite": "auto",
+          "filter": "saturate(0.95)",
+          "computedOffset": 1
+        }
+      ],
+      "timing": {
+        "duration": 3800,
+        "delay": 0,
+        "iterations": null,
+        "easing": "linear",
+        "direction": "normal"
+      }
+    }
+  ]
+}

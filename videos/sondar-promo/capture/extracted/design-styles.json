@@ -1,0 +1,199 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "Aptos Display",
+      "fontSize": "92.8px",
+      "fontWeight": "760",
+      "lineHeight": "88.16px",
+      "letterSpacing": "-2.32px",
+      "color": "#F7FBFF",
+      "sampleText": "Encuestas que se comportan como rutas vivas."
+    },
+    {
+      "role": "body",
+      "fontFamily": "Aptos",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "27.2px",
+      "letterSpacing": "normal",
+      "color": "#AAB8CA",
+      "sampleText": "Diseña flujos dinámicos, publica enlaces y lee audiencias de"
+    },
+    {
+      "role": "label",
+      "fontFamily": "IBM Plex Mono",
+      "fontSize": "11.2px",
+      "fontWeight": "750",
+      "lineHeight": "normal",
+      "letterSpacing": "0.896px",
+      "color": "#AAB8CA",
+      "sampleText": "Rutas"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      7,
+      8,
+      9,
+      11,
+      12,
+      14,
+      16,
+      19,
+      72
+    ],
+    "baseUnit": 8
+  },
+  "radius": [
+    "14px"
+  ],
+  "shadows": [
+    {
+      "value": "rgba(0, 0, 0, 0.26) 0px 20px 54px 0px",
+      "count": 2
+    },
+    {
+      "value": "rgba(47, 109, 246, 0.22) 0px 18px 42px 0px",
+      "count": 1
+    }
+  ],
+  "buttons": [
+    {
+      "label": "Iniciar sesión",
+      "background": "#6EA3FF",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#07101F",
+      "padding": "11.84px 16px",
+      "borderRadius": "14px",
+      "border": "1px solid rgba(0, 0, 0, 0)",
+      "boxShadow": "rgba(47, 109, 246, 0.22) 0px 18px 42px 0px",
+      "fontSize": "14.72px",
+      "fontWeight": "820",
+      "height": "46px"
+    },
+    {
+      "label": "Ver demo",
+      "background": "#EBF4FF",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#F7FBFF",
+      "padding": "11.84px 16px",
+      "borderRadius": "14px",
+      "border": "1px solid rgba(210, 226, 255, 0.26)",
+      "boxShadow": "none",
+      "fontSize": "14.72px",
+      "fontWeight": "820",
+      "height": "46px"
+    },
+    {
+      "label": "Mapa noche",
+      "background": "color(srgb 0.0705882 0.105882 0.176471 / 0.92)",
+      "backgroundImage": "",
+      "backdropFilter": "blur(14px)",
+      "color": "#F7FBFF",
+      "padding": "7.2px 12px 7.2px 7.2px",
+      "borderRadius": "14px",
+      "border": "1px solid rgba(210, 226, 255, 0.26)",
+      "boxShadow": "rgba(0, 0, 0, 0.26) 0px 20px 54px 0px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "44px"
+    }
+  ],
+  "cards": [
+    {
+      "label": "card",
+      "background": "#172033",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#F7FBFF",
+      "padding": "19.2px",
+      "borderRadius": "18px",
+      "border": "0px none rgb(247, 251, 255)",
+      "boxShadow": "rgba(0, 0, 0, 0.26) 0px 20px 54px 0px",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "height": "620px"
+    }
+  ],
+  "nav": null,
+  "chips": [
+    {
+      "label": "Mapa de encuesta",
+      "background": "#6EA3FF",
+      "color": "#F7FBFF",
+      "padding": "5.6px 10.4px",
+      "borderRadius": "14px",
+      "border": "1px solid rgba(210, 226, 255, 0.14)",
+      "boxShadow": "none",
+      "fontSize": "12.48px",
+      "fontWeight": "760",
+      "height": "32px"
+    },
+    {
+      "label": "01",
+      "background": "#172033",
+      "color": "#F7FBFF",
+      "padding": "0px",
+      "borderRadius": "50%",
+      "border": "5px solid rgb(110, 163, 255)",
+      "boxShadow": "rgba(0, 0, 0, 0.18) 0px 10px 24px 0px",
+      "fontSize": "11.52px",
+      "fontWeight": "800",
+      "height": "33.5938px"
+    },
+    {
+      "label": "02",
+      "background": "#172033",
+      "color": "#F7FBFF",
+      "padding": "0px",
+      "borderRadius": "50%",
+      "border": "5px solid rgb(35, 183, 164)",
+      "boxShadow": "rgba(0, 0, 0, 0.18) 0px 10px 24px 0px",
+      "fontSize": "11.52px",
+      "fontWeight": "800",
+      "height": "33.5938px"
+    },
+    {
+      "label": "04",
+      "background": "#172033",
+      "color": "#F7FBFF",
+      "padding": "0px",
+      "borderRadius": "50%",
+      "border": "5px solid rgb(217, 155, 43)",
+      "boxShadow": "rgba(0, 0, 0, 0.18) 0px 10px 24px 0px",
+      "fontSize": "11.52px",
+      "fontWeight": "800",
+      "height": "33.5938px"
+    }
+  ],
+  "statCells": [
+    {
+      "background": "transparent",
+      "borderRadius": "0px",
+      "border": "0px none rgb(110, 163, 255)",
+      "boxShadow": "none",
+      "numberFontSize": "36px",
+      "numberFontWeight": "760",
+      "numberColor": "#6EA3FF"
+    }
+  ],
+  "tabs": [],
+  "backgrounds": [
+    {
+      "value": "linear-gradient(rgba(179, 205, 255, 0.06) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(179, 205, 255, 0.04) 1px, rgba(0, 0, 0, 0) 1px), radial-gradient(circle at 18% 14%, rgba(110, 163, 255, 0.16), rgba(0, 0, 0, 0) 384px), radial-gradient(circle at 88% 24%, rgba(35, 183, 164, 0.12), rgba(0, 0, 0, 0) 416px), linear-gradient(135deg, rgb(16, 22, 34) 0%, rgb(18, 26, 41) 52%, rgb(12, 23, 25) 100%)",
+      "area": 2073600
+    },
+    {
+      "value": "radial-gradient(circle, rgba(179, 205, 255, 0.035) 0px, rgba(179, 205, 255, 0.035) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(115deg, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0) 49%, rgba(179, 205, 255, 0.035) 49%, rgba(179, 205, 255, 0.035) 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 100%)",
+      "area": 2073600
+    },
+    {
+      "value": "linear-gradient(rgba(179, 205, 255, 0.06) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(179, 205, 255, 0.04) 1px, rgba(0, 0, 0, 0) 1px), none",
+      "area": 321646
+    }
+  ],
+  "glass": []
+}
