@@ -3,6 +3,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from 'recharts';
 import { toPng, toJpeg } from 'html-to-image';
+import { generateQuestionAnalytics } from '@/lib/statistics';
 
 const COLORS = ['#4F8A8B', '#FBD46D', '#EF4444', '#10B981', '#8B5CF6', '#F97316'];
 
@@ -154,6 +155,50 @@ export default function MetricsClient({ survey }: { survey: any }) {
       }
     });
 
+    // Añade pestaña de Estadísticas y Analíticas (Media, Mediana, Moda y Desviación Estándar)
+    const statSheet = workbook.addWorksheet('Estadísticas y Analíticas', { views: [{ state: 'frozen', ySplit: 1 }] });
+    const statHeader = statSheet.addRow(['Pregunta', 'Total Respuestas', 'Media (Promedio)', 'Mediana', 'Moda', 'Desv. Estándar (s)']);
+    statHeader.font = { bold: true };
+    statSheet.getColumn(1).width = 55;
+    statSheet.getColumn(2).width = 18;
+    statSheet.getColumn(3).width = 18;
+    statSheet.getColumn(4).width = 16;
+    statSheet.getColumn(5).width = 16;
+    statSheet.getColumn(6).width = 22;
+
+    survey.questions.forEach((q: any) => {
+      if (q.type !== 'TEXT') {
+        const optionsList = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
+        if (optionsList) {
+          const numericValues: number[] = [];
+          q.answers.forEach((a: any) => {
+            if (a.optionId) {
+              const optIndex = optionsList.findIndex((o: any) => o.id === a.optionId);
+              if (optIndex !== -1) {
+                const opt = optionsList[optIndex];
+                const numericValue = (opt && opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value : (optIndex + 1);
+                numericValues.push(numericValue);
+              }
+            }
+          });
+          const analytics = generateQuestionAnalytics(q.id, numericValues);
+          if (analytics.statistics.mean !== null) {
+            const row = statSheet.addRow([
+              q.text,
+              analytics.totalResponses,
+              analytics.statistics.mean,
+              analytics.statistics.median,
+              analytics.statistics.mode?.join(', ') ?? 'N/A',
+              analytics.statistics.standardDeviation
+            ]);
+            row.eachCell((cell) => {
+              cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            });
+          }
+        }
+      }
+    });
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     saveAs(blob, `Resultados_${survey.title.replace(/[^a-z0-9]/gi, '_')}.xlsx`);
@@ -293,8 +338,63 @@ export default function MetricsClient({ survey }: { survey: any }) {
             optionsData.push({ name: 'No Responde', value: missingCount });
           }
 
+          // Cálculo de Tendencia Central y Dispersión
+          const numericValues: number[] = [];
+          q.answers.forEach((a: any) => {
+            if (a.optionId) {
+              const optIndex = optionsList.findIndex((o: any) => o.id === a.optionId);
+              if (optIndex !== -1) {
+                const opt = optionsList[optIndex];
+                const numericValue = (opt && opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value : (optIndex + 1);
+                numericValues.push(numericValue);
+              }
+            }
+          });
+          const possibleValues = optionsList.map((opt: any, idx: number) => 
+            (opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value : (idx + 1)
+          );
+          const analytics = generateQuestionAnalytics(q.id, numericValues, possibleValues);
+
           return (
-            <div key={q.id} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+            <div key={q.id} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1.5rem' }}>
+              {/* Panel de Estadísticas: Media, Mediana, Moda y Desviación Estándar */}
+              <div className="card" style={{ padding: '1.25rem 1.75rem', borderLeft: '4px solid var(--color-cta, #10b981)', background: 'var(--color-bg-secondary, rgba(255, 255, 255, 0.03))' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+                  <div style={{ flex: '1 1 300px' }}>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
+                      {i + 1}. {q.text}
+                    </h3>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '0.35rem' }}>
+                      Respuestas analizadas: <strong>{analytics.totalResponses}</strong> {missingCount > 0 ? `(${missingCount} sin responder)` : ''}
+                    </span>
+                  </div>
+
+                  {analytics.statistics.mean !== null ? (
+                    <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
+                      <div style={{ background: 'var(--color-bg, rgba(255, 255, 255, 0.05))', padding: '0.65rem 1.15rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center', minWidth: '95px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>Media</span>
+                        <strong style={{ fontSize: '1.25rem', color: 'var(--color-text-main)' }}>{analytics.statistics.mean.toFixed(2)}</strong>
+                      </div>
+                      <div style={{ background: 'var(--color-bg, rgba(255, 255, 255, 0.05))', padding: '0.65rem 1.15rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center', minWidth: '95px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>Mediana</span>
+                        <strong style={{ fontSize: '1.25rem', color: 'var(--color-text-main)' }}>{analytics.statistics.median}</strong>
+                      </div>
+                      <div style={{ background: 'var(--color-bg, rgba(255, 255, 255, 0.05))', padding: '0.65rem 1.15rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center', minWidth: '95px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>Moda</span>
+                        <strong style={{ fontSize: '1.25rem', color: 'var(--color-text-main)' }}>{analytics.statistics.mode?.join(', ') ?? 'N/A'}</strong>
+                      </div>
+                      <div style={{ background: 'var(--color-bg, rgba(255, 255, 255, 0.05))', padding: '0.65rem 1.15rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', textAlign: 'center', minWidth: '125px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.2rem' }}>Desv. Estándar (s)</span>
+                        <strong style={{ fontSize: '1.25rem', color: 'var(--color-cta, #10b981)' }}>{analytics.statistics.standardDeviation}</strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>Sin datos suficientes para cálculo estadístico</span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
               {/* Bar Chart Panel */}
               <div id={`chart-q-bar-${q.id}`} className="card" style={{ padding: '1.5rem', position: 'relative' }}>
                 <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
@@ -338,6 +438,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
                   </ResponsiveContainer>
                 </div>
               </div>
+            </div>
             </div>
           )
         })}
