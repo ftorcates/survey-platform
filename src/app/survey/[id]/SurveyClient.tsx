@@ -301,7 +301,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             borderTop: '1px solid var(--color-border)',
             borderBottom: '1px solid var(--color-border)'
           }}>
-            <span style={{ fontSize: '1.5rem' }}>🙌</span>
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', background: 'var(--color-primary)', boxShadow: '0 0 0 6px var(--color-accent-soft)', flexShrink: 0 }} />
             <p style={{ fontSize: '1.1rem', fontWeight: 500, color: 'var(--color-text-main)', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
               &quot;Agradecemos y apreciamos mucho su participación {survey.isMandatory ? 'obligatoria' : 'voluntaria'} en el proceso.&quot;
             </p>
@@ -424,13 +424,13 @@ export default function SurveyClient({ survey }: { survey: any }) {
     <div style={{ width: '100%', position: 'relative' }}>
       <header style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "1.5rem", alignItems: "end", marginBottom: "2rem" }}>
         <div>
-          <div className="eyebrow" style={{ marginBottom: "0.6rem" }}>Encuesta en progreso</div>
+          <div className="eyebrow" style={{ marginBottom: "0.6rem" }}>Ruta en progreso</div>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', lineHeight: 1.05, fontWeight: 800, color: 'var(--color-text-main)', letterSpacing: '-0.01em' }}>
             {survey.title}
           </h1>
         </div>
         <div className="card stat-card" style={{ minWidth: "120px", padding: '0.75rem 1.25rem', textAlign: 'center', background: 'var(--color-surface)' }}>
-          <div className="stat-label" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Preguntas</div>
+          <div className="stat-label" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Nodos</div>
           <div className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{survey.questions ? survey.questions.length : 0}</div>
         </div>
       </header>
@@ -579,7 +579,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                 <div style={{ padding: '3.5rem 3rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <span className="eyebrow" style={{ color: 'var(--color-text-muted)' }}>
-                      Pregunta {currentStep + 1} de {survey.questions.length}
+                      Nodo {currentStep + 1} de {survey.questions.length}
                     </span>
                   </div>
 

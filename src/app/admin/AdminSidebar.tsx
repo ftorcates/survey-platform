@@ -20,14 +20,14 @@ export default function AdminSidebar({
   return (
     <aside className="glass-panel admin-sidebar">
       <div className="brand-lockup">
-        <div className="brand-badge">
-          <ClipboardList size={20} />
+          <div className="brand-badge">
+            <ClipboardList size={20} />
+          </div>
+          <div>
+            <div className="brand-kicker">Survey Platform</div>
+            <div className="brand-title">Mapa de flujos</div>
+          </div>
         </div>
-        <div>
-          <div className="brand-kicker">Survey Platform</div>
-          <div className="brand-title">Control Center</div>
-        </div>
-      </div>
       <nav className="nav-list" aria-label="Navegación principal">
         {links.map(({ href, label, icon: Icon }) => {
           const isActive =

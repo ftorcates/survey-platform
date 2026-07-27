@@ -51,7 +51,7 @@ export default function ThemeToggle() {
           {isLight ? <Sun size={15} /> : <Moon size={15} />}
         </span>
       </span>
-      <span className="theme-toggle__label">{isLight ? "Light" : "Dark"}</span>
+      <span className="theme-toggle__label">{isLight ? "Mapa claro" : "Mapa noche"}</span>
     </button>
   );
 }
