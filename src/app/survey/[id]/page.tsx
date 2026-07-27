@@ -26,7 +26,7 @@ export default async function SurveyPage({ params }: { params: Promise<{ id: str
   if (!survey) return notFound();
 
   return (
-    <div className="container page-shell" style={{ minHeight: '100vh', display: 'grid', alignItems: 'center' }}>
+    <div className="container page-shell survey-shell">
       <main className="survey-frame" style={{ position: 'relative', width: '100%' }}>
         <SurveyClient survey={survey} />
       </main>
