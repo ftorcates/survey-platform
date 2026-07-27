@@ -7,14 +7,23 @@ import { createSurvey } from "./actions";
 export default function CreateSurveyModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [type, setType] = useState<"CUSTOM" | "FIXED_SCALE">("CUSTOM");
-  const [options, setOptions] = useState<string[]>(["Nunca", "A veces", "Siempre"]);
+  const [options, setOptions] = useState<{ text: string; value: number }[]>([
+    { text: "Nunca", value: 1 },
+    { text: "A veces", value: 2 },
+    { text: "Siempre", value: 3 }
+  ]);
   const [isMandatory, setIsMandatory] = useState<boolean>(true);
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
 
-  const handleAddOption = () => setOptions([...options, ""]);
-  const handleOptionChange = (index: number, value: string) => {
+  const handleAddOption = () => setOptions([...options, { text: "", value: options.length + 1 }]);
+  const handleOptionTextChange = (index: number, text: string) => {
     const newOptions = [...options];
-    newOptions[index] = value;
+    newOptions[index] = { ...newOptions[index], text };
+    setOptions(newOptions);
+  };
+  const handleOptionValueChange = (index: number, value: number) => {
+    const newOptions = [...options];
+    newOptions[index] = { ...newOptions[index], value };
     setOptions(newOptions);
   };
   const handleRemoveOption = (index: number) => {
@@ -273,20 +282,33 @@ export default function CreateSurveyModal() {
                     </label>
                   </div>
 
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Opciones Globales Compartidas</label>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>Estas opciones se mostrarán para todas las preguntas de la encuesta.</p>
+                  <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: 600 }}>Opciones y Puntajes de la Escala</label>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
+                    Define las opciones de respuesta y su valor numérico asignado (estos puntajes son para cálculos estadísticos y nunca se mostrarán a los encuestados).
+                  </p>
                   
                   {options.map((opt, i) => (
-                    <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.6rem', alignItems: 'center' }}>
                       <input 
                         type="text" 
-                        value={opt}
-                        onChange={(e) => handleOptionChange(i, e.target.value)}
+                        value={opt.text}
+                        onChange={(e) => handleOptionTextChange(i, e.target.value)}
                         placeholder={`Opción ${i + 1}`}
                         required
                         className="input-base"
                         style={{ flex: 1, padding: '0.6rem 0.75rem' }}
                       />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255, 255, 255, 0.04)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>Puntaje:</span>
+                        <input 
+                          type="number" 
+                          value={opt.value}
+                          onChange={(e) => handleOptionValueChange(i, parseInt(e.target.value) || 0)}
+                          required
+                          className="input-base"
+                          style={{ width: '60px', padding: '0.35rem', textAlign: 'center', fontWeight: 700, borderRadius: '4px' }}
+                        />
+                      </div>
                       {options.length > 2 && (
                         <button type="button" onClick={() => handleRemoveOption(i)} className="btn-danger" style={{ padding: '0.5rem 0.7rem', borderRadius: "0.8rem" }}>
                           <X size={16} />
@@ -299,7 +321,7 @@ export default function CreateSurveyModal() {
                     + Añadir Opción
                   </button>
 
-                  <input type="hidden" name="globalOptions" value={JSON.stringify(options.filter(o => o.trim() !== ''))} />
+                  <input type="hidden" name="globalOptions" value={JSON.stringify(options.filter(o => o.text.trim() !== ''))} />
                 </div>
               )}
 

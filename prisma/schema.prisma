@@ -107,6 +107,7 @@ model Option {
   questionId     String?
   surveyId       String?
   text           String
+  value          Int?      @default(0)
   nextQuestionId String?
   answers        Answer[]
   question       Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
