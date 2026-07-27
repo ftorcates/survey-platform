@@ -55,7 +55,11 @@ export async function createSurvey(formData: FormData) {
       authorId: session.user.id,
       ...(type === 'FIXED_SCALE' && globalOptionsRaw ? {
         options: {
-          create: JSON.parse(globalOptionsRaw).map((text: string) => ({ text }))
+          create: JSON.parse(globalOptionsRaw).map((item: { text: string; value?: number } | string, idx: number) => 
+            typeof item === 'string'
+              ? { text: item, value: idx + 1 }
+              : { text: item.text, value: typeof item.value === 'number' ? item.value : idx + 1 }
+          )
         }
       } : {})
     }

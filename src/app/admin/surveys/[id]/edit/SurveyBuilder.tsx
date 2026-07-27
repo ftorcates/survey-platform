@@ -14,7 +14,8 @@ import {
   addBlock,
   updateBlock,
   deleteBlock,
-  moveQuestionToBlock
+  moveQuestionToBlock,
+  updateScaleOptions
 } from "./actions"
 import { Plus, GitBranch, Edit3, Trash2, Check, X, Save, List, Layers, FolderPlus } from "lucide-react"
 
@@ -46,6 +47,21 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
 
   // Per-block question text inputs
   const [blockQuestionTexts, setBlockQuestionTexts] = useState<Record<string, string>>({});
+
+  // Likert Scale editing state
+  const [isEditingScale, setIsEditingScale] = useState(false);
+  const [scaleOptions, setScaleOptions] = useState<{ id?: string; text: string; value: number }[]>(
+    (survey.options || []).map((opt: any, idx: number) => ({ id: opt.id, text: opt.text, value: opt.value ?? (idx + 1) }))
+  );
+  const [deletedScaleIds, setDeletedScaleIds] = useState<string[]>([]);
+  const [isSavingScale, setIsSavingScale] = useState(false);
+
+  const handleSaveScale = async () => {
+    setIsSavingScale(true);
+    await updateScaleOptions(survey.id, scaleOptions.filter(o => o.text.trim() !== ""), deletedScaleIds);
+    setIsSavingScale(false);
+    setIsEditingScale(false);
+  };
 
   const handleUpdateHeader = async () => {
     await updateSurveyHeader(survey.id, { title: editTitle, description: editDescription });
@@ -156,18 +172,112 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
       {/* --- MODO LIKERT / FIXED_SCALE (CON SOPORTE PARA BLOQUES Y DIMENSIONES) --- */}
       {survey.type === 'FIXED_SCALE' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="card" style={{ padding: '1rem 1.5rem', borderLeft: '4px solid var(--color-secondary)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Opciones Globales de la Escala</h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
-              Todas las preguntas o ítems evaluados usarán esta matriz de valoración en la encuesta final:
-            </p>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {survey.options?.map((opt: any) => (
-                <span key={opt.id} className="chip">
-                  {opt.text}
-                </span>
-              ))}
-            </div>
+          <div className="card" style={{ padding: '1.5rem 1.75rem', borderLeft: '4px solid var(--color-secondary)' }}>
+            {!isEditingScale ? (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
+                  <div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-main)', margin: 0 }}>
+                      Opciones Globales y Puntajes de la Escala
+                    </h3>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', margin: '0.25rem 0 0 0' }}>
+                      Todas las preguntas usarán esta escala. Los puntajes numéricos son confidenciales y solo se utilizan en los análisis estadísticos.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setScaleOptions((survey.options || []).map((opt: any, idx: number) => ({ id: opt.id, text: opt.text, value: opt.value ?? (idx + 1) })));
+                      setDeletedScaleIds([]);
+                      setIsEditingScale(true);
+                    }}
+                    className="btn-secondary"
+                    style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem' }}
+                  >
+                    <Edit3 size={15} /> Editar Escala y Puntajes
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+                  {survey.options?.map((opt: any, index: number) => (
+                    <span key={opt.id} className="chip" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0.85rem', fontSize: '0.925rem', background: 'var(--color-bg-secondary, rgba(255,255,255,0.05))', border: '1px solid var(--color-border)' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{opt.text}</span>
+                      <span style={{ background: 'var(--color-primary-soft, rgba(59, 130, 246, 0.15))', color: 'var(--color-primary, #3b82f6)', padding: '0.15rem 0.5rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>
+                        Puntaje: {opt.value ?? (index + 1)}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem' }}>
+                  <h4 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>Editar Opciones y Valores Numéricos</h4>
+                  <button onClick={() => setIsEditingScale(false)} className="btn-ghost" style={{ padding: '0.3rem' }}>
+                    <X size={20} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {scaleOptions.map((opt, index) => (
+                    <div key={opt.id || `new_${index}`} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                      <input 
+                        className="input-base"
+                        value={opt.text}
+                        onChange={(e) => {
+                          const updated = [...scaleOptions];
+                          updated[index] = { ...updated[index], text: e.target.value };
+                          setScaleOptions(updated);
+                        }}
+                        placeholder={`Texto opción ${index + 1}`}
+                        style={{ flex: 1, padding: '0.6rem 0.85rem' }}
+                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255, 255, 255, 0.04)', padding: '0.25rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                        <span style={{ fontSize: '0.825rem', fontWeight: 600, color: 'var(--color-text-muted)' }}>Puntaje:</span>
+                        <input 
+                          type="number"
+                          className="input-base"
+                          value={opt.value}
+                          onChange={(e) => {
+                            const updated = [...scaleOptions];
+                            updated[index] = { ...updated[index], value: parseInt(e.target.value) || 0 };
+                            setScaleOptions(updated);
+                          }}
+                          style={{ width: '70px', padding: '0.4rem', textAlign: 'center', fontWeight: 700 }}
+                        />
+                      </div>
+                      {scaleOptions.length > 2 && (
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            if (opt.id && !opt.id.startsWith("new_")) {
+                              setDeletedScaleIds([...deletedScaleIds, opt.id]);
+                            }
+                            setScaleOptions(scaleOptions.filter((_, i) => i !== index));
+                          }}
+                          className="btn-danger"
+                          style={{ padding: '0.55rem 0.7rem', borderRadius: '0.5rem' }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--color-border)' }}>
+                  <button
+                    type="button"
+                    onClick={() => setScaleOptions([...scaleOptions, { id: `new_${scaleOptions.length + 1}`, text: '', value: scaleOptions.length + 1 }])}
+                    style={{ background: 'transparent', border: '1px dashed var(--color-border)', color: 'var(--color-text-main)', padding: '0.6rem 1.25rem', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}
+                  >
+                    + Añadir Otra Opción
+                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button type="button" onClick={() => setIsEditingScale(false)} className="btn-secondary" disabled={isSavingScale}>Cancelar</button>
+                    <button type="button" onClick={handleSaveScale} className="btn-primary" disabled={isSavingScale} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Save size={16} /> {isSavingScale ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Tarjeta de Crear Nuevo Bloque */}

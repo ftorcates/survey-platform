@@ -119,3 +119,30 @@ export async function moveQuestionToBlock(questionId: string, blockId: string | 
   });
   revalidatePath(`/admin/surveys/${surveyId}/edit`);
 }
+
+export async function updateScaleOptions(
+  surveyId: string,
+  options: { id?: string; text: string; value: number }[],
+  deletedIds: string[] = []
+) {
+  for (const delId of deletedIds) {
+    await prisma.option.delete({ where: { id: delId } }).catch(() => {});
+  }
+  for (const opt of options) {
+    if (opt.id && !opt.id.startsWith("new_")) {
+      await prisma.option.update({
+        where: { id: opt.id },
+        data: { text: opt.text, value: opt.value }
+      });
+    } else {
+      await prisma.option.create({
+        data: {
+          surveyId,
+          text: opt.text,
+          value: opt.value
+        }
+      });
+    }
+  }
+  revalidatePath(`/admin/surveys/${surveyId}/edit`);
+}
