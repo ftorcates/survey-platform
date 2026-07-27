@@ -250,15 +250,15 @@ export default function MetricsClient({ survey }: { survey: any }) {
 
       {/* Demographics */}
       <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginTop: '1rem' }}>Datos Demográficos</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        <div id="chart-edad" className="card" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
-          <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-            <button onClick={() => downloadImage('chart-edad', 'png', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-            <button onClick={() => downloadImage('chart-edad', 'jpeg', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '1.75rem', alignItems: 'stretch' }}>
+        <div id="chart-edad" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
+          <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+            <button onClick={() => downloadImage('chart-edad', 'png', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+            <button onClick={() => downloadImage('chart-edad', 'jpeg', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
           </div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', textAlign: 'center' }}>Distribución por Edad</h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={ageChartData} margin={{ top: 20, right: 10, left: -20, bottom: 20 }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Edad</h3>
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={ageChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} />
               <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
@@ -270,13 +270,13 @@ export default function MetricsClient({ survey }: { survey: any }) {
           </ResponsiveContainer>
         </div>
         
-        <div id="chart-sexo" className="card" style={{ padding: '1.5rem', height: '350px', minWidth: 0, position: 'relative' }}>
-          <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-            <button onClick={() => downloadImage('chart-sexo', 'png', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-            <button onClick={() => downloadImage('chart-sexo', 'jpeg', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+        <div id="chart-sexo" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
+          <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+            <button onClick={() => downloadImage('chart-sexo', 'png', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+            <button onClick={() => downloadImage('chart-sexo', 'jpeg', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
           </div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', textAlign: 'center' }}>Distribución por Sexo</h3>
-          <ResponsiveContainer width="100%" height="100%">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Sexo</h3>
+          <ResponsiveContainer width="100%" height="85%">
             <PieChart>
               <Pie data={sexChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
                 {sexChartData.map((entry, index) => (
@@ -494,23 +494,23 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.75rem' }}>
               {/* Bar Chart Panel */}
-              <div id={`chart-q-bar-${q.id}`} className="card" style={{ padding: '1.5rem', position: 'relative' }}>
-                <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-                  <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'png', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-                  <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'jpeg', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+              <div id={`chart-q-bar-${q.id}`} className="card" style={{ padding: '1.75rem', position: 'relative', minWidth: 0 }}>
+                <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                  <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'png', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                  <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'jpeg', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
                 </div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', paddingRight: '100px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Cantidades)</span></h3>
-                <div style={{ height: '300px', minWidth: 0 }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Cantidades)</span></h3>
+                <div style={{ height: '320px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={optionsData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart data={optionsData} layout="vertical" margin={{ top: 10, right: 45, left: 10, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                       <XAxis type="number" allowDecimals={false} />
-                      <YAxis dataKey="name" type="category" width={200} tick={{ fontSize: 12 }} />
+                      <YAxis dataKey="name" type="category" width={170} tick={{ fontSize: 13, fontWeight: 500 }} />
                       <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
                       <Bar dataKey="value" fill="#0F9D58" radius={[0, 4, 4, 0]}>
-                        <LabelList dataKey="value" position="right" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 600 }} />
+                        <LabelList dataKey="value" position="right" style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 600 }} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -518,13 +518,13 @@ export default function MetricsClient({ survey }: { survey: any }) {
               </div>
 
               {/* Pie Chart Panel */}
-              <div id={`chart-q-pie-${q.id}`} className="card" style={{ padding: '1.5rem', position: 'relative' }}>
-                <div className="hide-on-download" style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-                  <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'png', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-                  <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'jpeg', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+              <div id={`chart-q-pie-${q.id}`} className="card" style={{ padding: '1.75rem', position: 'relative', minWidth: 0 }}>
+                <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                  <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'png', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                  <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'jpeg', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
                 </div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', paddingRight: '100px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Porcentajes)</span></h3>
-                <div style={{ height: '300px', minWidth: 0 }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Porcentajes)</span></h3>
+                <div style={{ height: '320px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={optionsData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={2} dataKey="value" label={({ percent }: { percent?: number }) => (percent && percent > 0) ? `${(percent * 100).toFixed(0)}%` : ''} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>

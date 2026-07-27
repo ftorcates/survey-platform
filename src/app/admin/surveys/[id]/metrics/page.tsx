@@ -29,8 +29,8 @@ export default async function MetricsPage({ params }: { params: Promise<{ id: st
   if (!survey || survey.authorId !== session?.user?.id) return notFound();
 
   return (
-    <div style={{ maxWidth: '1100px' }}>
-      <div style={{ marginBottom: '2rem' }}>
+    <div style={{ maxWidth: '1480px', margin: '0 auto', width: '100%', paddingBottom: '3rem' }}>
+      <div style={{ marginBottom: '2.5rem' }}>
         <Link href="/admin" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-text-muted)', textDecoration: 'none', marginBottom: '1rem', fontWeight: 700 }}>
           <ArrowLeft size={16} /> Volver al Dashboard
         </Link>
