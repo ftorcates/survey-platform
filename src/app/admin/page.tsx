@@ -7,8 +7,8 @@ import CreateSurveyModal from "./CreateSurveyModal";
 
 export default async function AdminDashboard() {
   const surveys = await getSurveys();
-  const totalResponses = surveys.reduce((sum, survey) => sum + survey._count.responses, 0);
-  const totalQuestions = surveys.reduce((sum, survey) => sum + survey._count.questions, 0);
+  const totalResponses = surveys.reduce((sum: number, survey: any) => sum + (survey._count?.responses || 0), 0);
+  const totalQuestions = surveys.reduce((sum: number, survey: any) => sum + (survey._count?.questions || 0), 0);
   const averageResponses = surveys.length > 0 ? Math.round(totalResponses / surveys.length) : 0;
 
   return (
@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
             <CreateSurveyModal />
           </div>
         ) : (
-          surveys.map(survey => (
+          surveys.map((survey: any) => (
             <article key={survey.id} className="card survey-card">
               <div className="survey-card__route" aria-hidden="true">
                 <span />
