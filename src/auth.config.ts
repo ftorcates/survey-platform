@@ -3,7 +3,7 @@ import Google from "next-auth/providers/google"
 import GitHub from "next-auth/providers/github"
 
 export default {
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "default_super_secret_survey_platform_production_key_2026",
   trustHost: true,
   debug: true,
   providers: [
