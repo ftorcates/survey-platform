@@ -6,7 +6,7 @@ export default async function AudiencePage() {
   const responses = await getGlobalAudience();
 
   const totalParticipants = responses.length;
-  const uniqueSurveys = new Set(responses.map(r => r.surveyId)).size;
+  const uniqueSurveys = new Set(responses.map((r: any) => r.surveyId)).size;
   
   return (
     <div>
