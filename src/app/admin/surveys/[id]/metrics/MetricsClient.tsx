@@ -51,6 +51,14 @@ export default function MetricsClient({ survey }: { survey: any }) {
   }, {});
   const sexChartData = Object.keys(sexData).map(key => ({ name: key, value: sexData[key] }));
 
+  // Work mode grouping
+  const workModeData = survey.responses.reduce((acc: any, response: any) => {
+    const mode = response.workMode === 'none' ? 'Prefiero no decirlo' : (response.workMode || 'No especificado');
+    acc[mode] = (acc[mode] || 0) + 1;
+    return acc;
+  }, {});
+  const workModeChartData = Object.keys(workModeData).map(key => ({ name: key, value: workModeData[key] }));
+
   const exportToExcel = async () => {
     const ExcelJS = (await import('exceljs')).default;
     const { saveAs } = await import('file-saver');
@@ -65,7 +73,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
       // Add Demographics if required by survey
       sheet.addRow([`Respuesta #${idx + 1}`]);
       if (survey.requireDemographics) {
-        const demoRow = sheet.addRow([`Edad: ${response.ageGroup || 'N/A'}`, `Sexo: ${response.sex === 'M' ? 'Masculino' : response.sex === 'F' ? 'Femenino' : response.sex || 'N/A'}`]);
+        const demoRow = sheet.addRow([`Edad: ${response.ageGroup || 'N/A'}`, `Sexo: ${response.sex === 'M' ? 'Masculino' : response.sex === 'F' ? 'Femenino' : response.sex || 'N/A'}`, `Modalidad: ${response.workMode || 'N/A'}`]);
         demoRow.font = { bold: true };
       }
       sheet.addRow([]);
@@ -284,6 +292,25 @@ export default function MetricsClient({ survey }: { survey: any }) {
                   <Pie data={sexChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
                     {sexChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div id="chart-modalidad" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
+              <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                <button onClick={() => downloadImage('chart-modalidad', 'png', 'distribucion_modalidad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                <button onClick={() => downloadImage('chart-modalidad', 'jpeg', 'distribucion_modalidad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+              </div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Modalidad de Trabajo</h3>
+              <ResponsiveContainer width="100%" height="85%">
+                <PieChart>
+                  <Pie data={workModeChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
+                    {workModeChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />

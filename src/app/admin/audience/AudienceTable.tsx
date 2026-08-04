@@ -9,6 +9,7 @@ type AudienceResponse = {
   ageGroup?: string | null;
   sex?: string | null;
   location?: string | null;
+  workMode?: string | null;
   survey: {
     title: string;
   };
@@ -20,17 +21,19 @@ export default function AudienceTable({ responses }: { responses: AudienceRespon
   const filteredResponses = responses.filter(r => 
     r.survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     r.ageGroup?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    r.sex?.toLowerCase().includes(searchTerm.toLowerCase())
+    r.sex?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.workMode?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const exportToCSV = () => {
-    const headers = ["ID", "Fecha", "Encuesta", "Rango Etario", "Sexo", "Ubicación"];
+    const headers = ["ID", "Fecha", "Encuesta", "Rango Etario", "Sexo", "Modalidad", "Ubicación"];
     const rows = filteredResponses.map(r => [
       r.id,
       new Date(r.createdAt).toLocaleDateString(),
       r.survey.title,
       r.ageGroup || "N/A",
       r.sex || "N/A",
+      r.workMode || "N/A",
       r.location || "N/A"
     ]);
 
@@ -56,7 +59,7 @@ export default function AudienceTable({ responses }: { responses: AudienceRespon
           <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input 
             type="text" 
-            placeholder="Buscar por encuesta, edad o sexo..." 
+            placeholder="Buscar por encuesta, edad, sexo o modalidad..." 
             className="input-base"
             style={{ paddingLeft: '3rem', width: '100%' }}
             value={searchTerm}
@@ -77,6 +80,7 @@ export default function AudienceTable({ responses }: { responses: AudienceRespon
                 <th>Encuesta</th>
                 <th>Rango etario</th>
                 <th>Sexo</th>
+                <th>Modalidad</th>
                 <th>Ubicación</th>
               </tr>
             </thead>
@@ -98,6 +102,9 @@ export default function AudienceTable({ responses }: { responses: AudienceRespon
                     <td style={{ fontSize: '0.92rem' }}>
                       {response.sex || 'N/A'}
                     </td>
+                    <td style={{ fontSize: '0.92rem' }}>
+                      {response.workMode || 'N/A'}
+                    </td>
                     <td style={{ fontSize: '0.92rem', color: 'var(--color-text-muted)' }}>
                       {response.location || 'N/A'}
                     </td>
@@ -105,7 +112,7 @@ export default function AudienceTable({ responses }: { responses: AudienceRespon
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
                     No se encontraron registros de audiencia.
                   </td>
                 </tr>
