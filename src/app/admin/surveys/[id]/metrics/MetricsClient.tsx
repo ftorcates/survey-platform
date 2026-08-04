@@ -203,7 +203,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
 
     // Añade pestaña de Estadísticas y Analíticas (Media, Mediana, Moda y Desviación Estándar)
     const statSheet = workbook.addWorksheet('Estadísticas y Analíticas', { views: [{ state: 'frozen', ySplit: 1 }] });
-    const statHeader = statSheet.addRow(['Pregunta', 'Total Respuestas', 'Media (Promedio)', 'Mediana', 'Moda', 'Desv. Estándar (s)']);
+    const statHeader = statSheet.addRow(['Pregunta', 'Total Respuestas', 'Media (Promedio)', 'Mediana', 'Moda', 'Desv. Estándar (s)', 'Análisis Marginal (Patrón)']);
     statHeader.font = { bold: true };
     statSheet.getColumn(1).width = 55;
     statSheet.getColumn(2).width = 18;
@@ -211,6 +211,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
     statSheet.getColumn(4).width = 16;
     statSheet.getColumn(5).width = 16;
     statSheet.getColumn(6).width = 22;
+    statSheet.getColumn(7).width = 32;
 
     survey.questions.forEach((q: any) => {
       if (q.type !== 'TEXT') {
@@ -228,6 +229,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
             }
           });
           const analytics = generateQuestionAnalytics(q.id, numericValues);
+          const pattern = getDistributionPattern(numericValues, analytics.statistics, optionsList.length);
           if (analytics.statistics.mean !== null) {
             const row = statSheet.addRow([
               q.text,
@@ -235,7 +237,8 @@ export default function MetricsClient({ survey }: { survey: any }) {
               analytics.statistics.mean,
               analytics.statistics.median,
               analytics.statistics.mode?.join(', ') ?? 'N/A',
-              analytics.statistics.standardDeviation
+              analytics.statistics.standardDeviation,
+              pattern.name
             ]);
             row.eachCell((cell) => {
               cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
@@ -243,6 +246,176 @@ export default function MetricsClient({ survey }: { survey: any }) {
           }
         }
       }
+    });
+
+    // Añade pestaña de Porcentajes y Tendencias (% por opción + % Desacuerdo y % Acuerdo)
+    const pctSheet = workbook.addWorksheet('Porcentajes y Tendencias', { views: [{ state: 'frozen', ySplit: 1 }] });
+    const scaleOpts = survey.type === 'FIXED_SCALE' && survey.options ? survey.options : [];
+    const scaleOptHeaders = scaleOpts.map((o: any) => o.text);
+    
+    const pctHeaderRow = ['Pregunta / Dimensión', ...(scaleOptHeaders.length > 0 ? scaleOptHeaders : ['Opción 1', 'Opción 2', 'Opción 3', 'Opción 4', 'Opción 5']), '% DESACUERDO (% DES)', '% ACUERDO (% AC)'];
+    const pctHeader = pctSheet.addRow(pctHeaderRow);
+    pctHeader.font = { bold: true };
+    pctHeader.eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F2F4F7' } };
+      cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+    pctHeader.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    pctSheet.getColumn(1).width = 55;
+    for (let i = 2; i <= pctHeaderRow.length; i++) {
+      pctSheet.getColumn(i).width = 22;
+    }
+
+    const blocks = survey.blocks || [];
+    
+    if (blocks.length > 0) {
+      blocks.forEach((b: any) => {
+        const bQs = survey.questions.filter((q: any) => q.blockId === b.id && q.type !== 'TEXT');
+        if (bQs.length === 0) return;
+
+        const bTotals: number[] = new Array(scaleOpts.length || 5).fill(0);
+        let bDesTotal = 0;
+        let bAcTotal = 0;
+
+        const qRowsData: any[] = [];
+
+        bQs.forEach((q: any) => {
+          const qOpts = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
+          const totalAnswers = q.answers.filter((a: any) => a.optionId).length;
+          
+          const optPcts: number[] = [];
+          let desPct = 0;
+          let acPct = 0;
+
+          if (qOpts && qOpts.length > 0) {
+            qOpts.forEach((opt: any, idx: number) => {
+              const count = q.answers.filter((a: any) => a.optionId === opt.id).length;
+              const pct = totalAnswers > 0 ? (count / totalAnswers) * 100 : 0;
+              optPcts.push(pct);
+              
+              const norm = (opt && opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value / qOpts.length : (idx + 1) / qOpts.length;
+              if (norm <= 0.4) desPct += pct;
+              else if (norm >= 0.7) acPct += pct;
+            });
+          }
+
+          optPcts.forEach((p, pIdx) => {
+            bTotals[pIdx] = (bTotals[pIdx] || 0) + p;
+          });
+          bDesTotal += desPct;
+          bAcTotal += acPct;
+
+          qRowsData.push([
+            q.text,
+            ...optPcts.map((p) => `${p.toFixed(1)}%`),
+            `${desPct.toFixed(1)}%`,
+            `${acPct.toFixed(1)}%`
+          ]);
+        });
+
+        const numQs = bQs.length;
+        const bAvgPcts = bTotals.map((t) => `${(t / numQs).toFixed(1)}%`);
+        const bAvgDes = `${(bDesTotal / numQs).toFixed(1)}%`;
+        const bAvgAc = `${(bAcTotal / numQs).toFixed(1)}%`;
+
+        const blockRow = pctSheet.addRow([
+          b.title,
+          ...bAvgPcts,
+          bAvgDes,
+          bAvgAc
+        ]);
+        blockRow.font = { bold: true };
+        blockRow.eachCell((cell, colNum) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'D9D9D9' } };
+          cell.border = { top: { style: 'medium' }, left: { style: 'thin' }, bottom: { style: 'medium' }, right: { style: 'thin' } };
+          if (colNum > 1) cell.alignment = { horizontal: 'center' };
+        });
+
+        qRowsData.forEach((qRowValues) => {
+          const qRow = pctSheet.addRow(qRowValues);
+          qRow.eachCell((cell, colNum) => {
+            cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            if (colNum > 1) cell.alignment = { horizontal: 'center' };
+          });
+        });
+      });
+    } else {
+      survey.questions.forEach((q: any) => {
+        if (q.type !== 'TEXT') {
+          const qOpts = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
+          const totalAnswers = q.answers.filter((a: any) => a.optionId).length;
+          
+          const optPcts: number[] = [];
+          let desPct = 0;
+          let acPct = 0;
+
+          if (qOpts && qOpts.length > 0) {
+            qOpts.forEach((opt: any, idx: number) => {
+              const count = q.answers.filter((a: any) => a.optionId === opt.id).length;
+              const pct = totalAnswers > 0 ? (count / totalAnswers) * 100 : 0;
+              optPcts.push(pct);
+              
+              const norm = (opt && opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value / qOpts.length : (idx + 1) / qOpts.length;
+              if (norm <= 0.4) desPct += pct;
+              else if (norm >= 0.7) acPct += pct;
+            });
+          }
+
+          const qRow = pctSheet.addRow([
+            q.text,
+            ...optPcts.map((p) => `${p.toFixed(1)}%`),
+            `${desPct.toFixed(1)}%`,
+            `${acPct.toFixed(1)}%`
+          ]);
+          qRow.eachCell((cell, colNum) => {
+            cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+            if (colNum > 1) cell.alignment = { horizontal: 'center' };
+          });
+        }
+      });
+    }
+
+    // Fila final: Total General de la Encuesta (Evaluación Consolidada)
+    const allScaleQuestions = survey.questions.filter((q: any) => q.type !== 'TEXT');
+    let grandTotalAnswers = 0;
+    const globalOptCounts: number[] = new Array(scaleOpts.length || 5).fill(0);
+
+    allScaleQuestions.forEach((q: any) => {
+      const qOpts = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
+      if (qOpts && qOpts.length > 0) {
+        qOpts.forEach((opt: any, idx: number) => {
+          const count = q.answers.filter((a: any) => a.optionId === opt.id).length;
+          globalOptCounts[idx] = (globalOptCounts[idx] || 0) + count;
+          grandTotalAnswers += count;
+        });
+      }
+    });
+
+    let globalDesPct = 0;
+    let globalAcPct = 0;
+    const globalOptPcts = globalOptCounts.map((count, idx) => {
+      const pct = grandTotalAnswers > 0 ? (count / grandTotalAnswers) * 100 : 0;
+      const numOptions = scaleOpts.length || 5;
+      const norm = (idx + 1) / numOptions;
+      if (norm <= 0.4) globalDesPct += pct;
+      else if (norm >= 0.7) globalAcPct += pct;
+      return pct;
+    });
+
+    pctSheet.addRow([]);
+    const totalGenRow = pctSheet.addRow([
+      'Evaluación General de la Encuesta (Total Acumulado)',
+      ...globalOptPcts.map((p) => `${p.toFixed(1)}%`),
+      `${globalDesPct.toFixed(1)}%`,
+      `${globalAcPct.toFixed(1)}%`
+    ]);
+    totalGenRow.font = { bold: true };
+    totalGenRow.eachCell((cell, colNum) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'CBD5E1' } };
+      cell.border = { top: { style: 'double' }, left: { style: 'thin' }, bottom: { style: 'double' }, right: { style: 'thin' } };
+      if (colNum > 1) cell.alignment = { horizontal: 'center' };
     });
 
     if (survey.type === 'FIXED_SCALE' && survey.options) {
@@ -266,6 +439,75 @@ export default function MetricsClient({ survey }: { survey: any }) {
       globalSheet.addRow([]);
       const totalRow = globalSheet.addRow(['Total de Respuestas Evaluadas:', '', totalGlobalAnswers, '100%']);
       totalRow.font = { bold: true };
+    }
+
+    // Pestaña dedicada: Gráficos de Resultados
+    const chartsSheet = workbook.addWorksheet('Gráficos de Resultados');
+    chartsSheet.getColumn(1).width = 4;
+    chartsSheet.getColumn(2).width = 85;
+
+    const captureImage = async (elementId: string) => {
+      const element = document.getElementById(elementId);
+      if (!element) return null;
+      try {
+        const filter = (node: HTMLElement) => !node.classList?.contains('hide-on-download');
+        const computedBg = getComputedStyle(element).backgroundColor;
+        const isTransparent = !computedBg || computedBg === 'rgba(0, 0, 0, 0)' || computedBg === 'transparent';
+        const themeBg = document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#172033';
+        const bgColor = isTransparent ? themeBg : computedBg;
+
+        return await toPng(element, { backgroundColor: bgColor, filter, pixelRatio: 2 });
+      } catch (err) {
+        console.error('Error capturing chart image for Excel:', elementId, err);
+        return null;
+      }
+    };
+
+    let currentRow = 2;
+
+    const addChartToSheet = async (elementId: string, title: string) => {
+      const base64Data = await captureImage(elementId);
+      if (!base64Data) return;
+
+      const titleRow = chartsSheet.getRow(currentRow);
+      titleRow.getCell(2).value = title;
+      titleRow.getCell(2).font = { bold: true, size: 14 };
+      currentRow += 2;
+
+      const imageId = workbook.addImage({
+        base64: base64Data,
+        extension: 'png',
+      });
+
+      chartsSheet.addImage(imageId, {
+        tl: { col: 1, row: currentRow - 1 },
+        ext: { width: 620, height: 350 },
+      });
+
+      currentRow += 20;
+    };
+
+    if (document.getElementById('chart-global')) {
+      await addChartToSheet('chart-global', 'Frecuencia Absoluta Acumulada');
+    }
+
+    if (document.getElementById('chart-dimensions')) {
+      await addChartToSheet('chart-dimensions', 'Distribución por Dimensiones Medidas');
+    }
+
+    for (let idx = 0; idx < survey.questions.length; idx++) {
+      const q = survey.questions[idx];
+      if (q.type !== 'TEXT') {
+        const barId = `chart-q-bar-${q.id}`;
+        const pieId = `chart-q-pie-${q.id}`;
+
+        if (document.getElementById(barId)) {
+          await addChartToSheet(barId, `Pregunta ${idx + 1}: ${q.text} (Análisis Marginal)`);
+        }
+        if (document.getElementById(pieId)) {
+          await addChartToSheet(pieId, `Pregunta ${idx + 1}: ${q.text} (Porcentajes Válidos)`);
+        }
+      }
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
