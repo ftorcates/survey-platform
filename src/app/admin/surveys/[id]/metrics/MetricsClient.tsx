@@ -3,9 +3,34 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from 'recharts';
 import { toPng, toJpeg } from 'html-to-image';
-import { generateQuestionAnalytics } from '@/lib/statistics';
+import { generateQuestionAnalytics, getDistributionPattern } from '@/lib/statistics';
 
 const COLORS = ['#4F8A8B', '#FBD46D', '#EF4444', '#10B981', '#8B5CF6', '#F97316'];
+
+const CustomXAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+  const rawText: string = payload?.value || '';
+  const words = rawText.split(' ');
+  let lines: string[] = [];
+  if (words.length > 2) {
+    const mid = Math.ceil(words.length / 2);
+    lines = [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+  } else {
+    lines = [rawText];
+  }
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text textAnchor="middle" fill="var(--color-text-main, #94a3b8)" fontSize={11} fontWeight={500}>
+        {lines.map((line, idx) => (
+          <tspan x={0} dy={idx === 0 ? 12 : 14} key={idx}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  );
+};
 
 export default function MetricsClient({ survey }: { survey: any }) {
   const downloadImage = async (elementId: string, format: 'png' | 'jpeg', filename: string) => {
@@ -15,7 +40,19 @@ export default function MetricsClient({ survey }: { survey: any }) {
       const filter = (node: HTMLElement) => {
         return !node.classList?.contains('hide-on-download');
       };
-      const dataUrl = format === 'png' ? await toPng(el, { backgroundColor: '#ffffff', filter }) : await toJpeg(el, { backgroundColor: '#ffffff', quality: 0.95, filter });
+      
+      const computedBg = getComputedStyle(el).backgroundColor;
+      const isTransparent = !computedBg || computedBg === 'rgba(0, 0, 0, 0)' || computedBg === 'transparent';
+      const themeBg = document.documentElement.getAttribute('data-theme') === 'light' ? '#ffffff' : '#172033';
+      const bgColor = isTransparent ? themeBg : computedBg;
+
+      const options = {
+        backgroundColor: bgColor,
+        filter,
+        ...(format === 'jpeg' ? { quality: 0.95 } : {})
+      };
+
+      const dataUrl = format === 'png' ? await toPng(el, options) : await toJpeg(el, options);
       const link = document.createElement('a');
       link.download = `${filename}.${format}`;
       link.href = dataUrl;
@@ -423,7 +460,7 @@ export default function MetricsClient({ survey }: { survey: any }) {
               <ResponsiveContainer width="100%" height="85%">
                 <BarChart data={globalCounts} margin={{ top: 20, right: 30, left: 20, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 13, fontWeight: 600 }} />
+                  <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
                   <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(val: any) => [`${val ?? 0} veces`, 'Frecuencia']} cursor={{ fill: 'rgba(0,0,0,0.04)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-lg)' }} />
                   <Bar dataKey="count" fill="#10B981" radius={[6, 6, 0, 0]}>
@@ -432,6 +469,81 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+
+            {/* Gráfico por Dimensiones / Bloques (Solo si existen bloques en la encuesta) */}
+            {(() => {
+              const blocks = survey.blocks || [];
+              if (blocks.length === 0) return null;
+
+              const satMap: Record<string, number> = {};
+              const neuMap: Record<string, number> = {};
+              const insatMap: Record<string, number> = {};
+
+              blocks.forEach((b: any) => {
+                const bQs = survey.questions.filter((q: any) => q.blockId === b.id);
+                let bSatCount = 0;
+                let bNeuCount = 0;
+                let bInsatCount = 0;
+                let bTotal = 0;
+
+                bQs.forEach((q: any) => {
+                  const qOpts = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
+                  q.answers.forEach((a: any) => {
+                    if (a.optionId) {
+                      const optIndex = qOpts.findIndex((o: any) => o.id === a.optionId);
+                      if (optIndex !== -1) {
+                        const opt = qOpts[optIndex];
+                        const val = (opt && opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value : (optIndex + 1);
+                        const norm = val / (qOpts.length || 5);
+                        bTotal++;
+                        if (norm <= 0.4) bInsatCount++;
+                        else if (norm >= 0.7) bSatCount++;
+                        else bNeuCount++;
+                      }
+                    }
+                  });
+                });
+
+                satMap[b.title] = bTotal > 0 ? Number(((bSatCount / bTotal) * 100).toFixed(1)) : 0;
+                neuMap[b.title] = bTotal > 0 ? Number(((bNeuCount / bTotal) * 100).toFixed(1)) : 0;
+                insatMap[b.title] = bTotal > 0 ? Number(((bInsatCount / bTotal) * 100).toFixed(1)) : 0;
+              });
+
+              const dimensionsChartData = [
+                { category: '% SATISFECHOS', ...satMap },
+                { category: '% NEUTROS', ...neuMap },
+                { category: '% INSATISFECHOS', ...insatMap }
+              ];
+
+              return (
+                <div id="chart-dimensions" className="card" style={{ padding: '1.75rem', height: '480px', minWidth: 0, position: 'relative' }}>
+                  <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                    <button onClick={() => downloadImage('chart-dimensions', 'png', 'distribucion_por_dimensiones')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                    <button onClick={() => downloadImage('chart-dimensions', 'jpeg', 'distribucion_por_dimensiones')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+                  </div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.25rem', textAlign: 'center' }}>Distribución por Dimensiones Medidas</h3>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', textAlign: 'center', marginBottom: '1.5rem' }}>
+                    Comparativo de tendencias (% Satisfechos, % Neutros, % Insatisfechos) por cada bloque o dimensión del estudio.
+                  </p>
+                  <div style={{ height: '350px', width: '100%', minWidth: 0 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dimensionsChartData} margin={{ top: 25, right: 30, left: 10, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fontSize: 13, fontWeight: 700, fill: 'var(--color-text-main)' }} />
+                        <YAxis unit="%" domain={[0, 100]} axisLine={false} tickLine={false} />
+                        <Tooltip formatter={(value: any, name: any) => [`${Number(value).toFixed(1)}%`, name]} cursor={{ fill: 'rgba(0,0,0,0.04)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-lg)' }} />
+                        <Legend verticalAlign="bottom" height={40} />
+                        {blocks.map((b: any, index: number) => (
+                          <Bar key={b.id} dataKey={b.title} fill={COLORS[index % COLORS.length]} radius={[4, 4, 0, 0]}>
+                            <LabelList dataKey={b.title} position="top" formatter={(val: any) => (val && Number(val) > 0) ? `${Number(val).toFixed(0)}%` : ''} style={{ fill: 'var(--color-text-main)', fontSize: '11px', fontWeight: 600 }} />
+                          </Bar>
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         );
       })()}
@@ -460,15 +572,13 @@ export default function MetricsClient({ survey }: { survey: any }) {
 
           // Options logic
           const optionsList = survey.type === 'FIXED_SCALE' ? survey.options : q.options;
-          const optionsData = optionsList.map((opt: any) => {
+          const barChartData = optionsList.map((opt: any) => {
             const count = q.answers.filter((a: any) => a.optionId === opt.id).length;
             return { name: opt.text, value: count };
           });
-          
+
           const missingCount = totalResponses - q.answers.length;
-          if (missingCount > 0) {
-            optionsData.push({ name: 'No Responde', value: missingCount });
-          }
+          const pieChartData = barChartData;
 
           // Cálculo de Tendencia Central y Dispersión
           const numericValues: number[] = [];
@@ -486,16 +596,34 @@ export default function MetricsClient({ survey }: { survey: any }) {
             (opt.value !== null && opt.value !== undefined && opt.value !== 0) ? opt.value : (idx + 1)
           );
           const analytics = generateQuestionAnalytics(q.id, numericValues, possibleValues);
+          const pattern = getDistributionPattern(numericValues, analytics.statistics, optionsList.length);
 
           return (
             <div key={q.id} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '1.5rem' }}>
               {/* Panel de Estadísticas: Media, Mediana, Moda y Desviación Estándar */}
-              <div className="card" style={{ padding: '1.25rem 1.75rem', borderLeft: '4px solid var(--color-cta, #10b981)', background: 'var(--color-bg-secondary, rgba(255, 255, 255, 0.03))' }}>
+              <div className="card" style={{ padding: '1.25rem 1.75rem', borderLeft: `4px solid ${pattern.badgeColor}`, background: 'var(--color-bg-secondary, rgba(255, 255, 255, 0.03))' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
                   <div style={{ flex: '1 1 300px' }}>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
-                      {i + 1}. {q.text}
-                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--color-text-main)' }}>
+                        {i + 1}. {q.text}
+                      </h3>
+                      <span 
+                        style={{ 
+                          padding: '0.25rem 0.75rem', 
+                          borderRadius: '20px', 
+                          fontSize: '0.75rem', 
+                          fontWeight: 700, 
+                          color: pattern.badgeColor, 
+                          backgroundColor: pattern.badgeBg,
+                          border: `1px solid ${pattern.badgeColor}44`,
+                          whiteSpace: 'nowrap'
+                        }} 
+                        title={pattern.description}
+                      >
+                        {pattern.name}
+                      </span>
+                    </div>
                     <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '0.35rem' }}>
                       Respuestas analizadas: <strong>{analytics.totalResponses}</strong> {missingCount > 0 ? `(${missingCount} sin responder)` : ''}
                     </span>
@@ -527,22 +655,22 @@ export default function MetricsClient({ survey }: { survey: any }) {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '1.75rem' }}>
-              {/* Bar Chart Panel */}
+              {/* Bar Chart Panel (Análisis Marginal / Distribución por Ítem) */}
               <div id={`chart-q-bar-${q.id}`} className="card" style={{ padding: '1.75rem', position: 'relative', minWidth: 0 }}>
                 <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
                   <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'png', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
                   <button onClick={() => downloadImage(`chart-q-bar-${q.id}`, 'jpeg', `pregunta_${i + 1}_cantidades`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
                 </div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Cantidades)</span></h3>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Análisis Marginal)</span></h3>
                 <div style={{ height: '320px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={optionsData} layout="vertical" margin={{ top: 10, right: 45, left: 10, bottom: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                      <XAxis type="number" allowDecimals={false} />
-                      <YAxis dataKey="name" type="category" width={170} tick={{ fontSize: 13, fontWeight: 500 }} />
+                    <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
+                      <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
                       <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
-                      <Bar dataKey="value" fill="#0F9D58" radius={[0, 4, 4, 0]}>
-                        <LabelList dataKey="value" position="right" style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 600 }} />
+                      <Bar dataKey="value" fill="var(--color-primary, #4F8A8B)" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 600 }} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -555,12 +683,13 @@ export default function MetricsClient({ survey }: { survey: any }) {
                   <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'png', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
                   <button onClick={() => downloadImage(`chart-q-pie-${q.id}`, 'jpeg', `pregunta_${i + 1}_porcentajes`)} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
                 </div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Porcentajes)</span></h3>
-                <div style={{ height: '320px', width: '100%', minWidth: 0 }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Porcentajes Válidos)</span></h3>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '1.25rem' }}>Calculado sobre {q.answers.length} respuestas emitidas</span>
+                <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={optionsData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={2} dataKey="value" label={({ percent }: { percent?: number }) => (percent && percent > 0) ? `${(percent * 100).toFixed(0)}%` : ''} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
-                        {optionsData.map((entry: any, index: number) => (
+                      <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={2} dataKey="value" label={({ percent }: { percent?: number }) => (percent && percent > 0) ? `${(percent * 100).toFixed(0)}%` : ''} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
+                        {pieChartData.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
