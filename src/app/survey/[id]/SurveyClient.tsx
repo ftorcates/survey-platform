@@ -15,6 +15,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // Demographics state
   const [ageGroup, setAgeGroup] = useState("");
   const [sex, setSex] = useState("");
+  const [workMode, setWorkMode] = useState("");
 
   // Current & accumulated answer state (Dynamic flow)
   const [textAnswer, setTextAnswer] = useState("");
@@ -58,7 +59,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       setCurrentStep(0);
     } else {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex }, []);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, []);
       setIsSubmitting(false);
       setStep('FINISHED');
     }
@@ -95,7 +96,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
     const isEndReached = nextQId === 'END' || (!nextQId && currentStep + 1 >= survey.questions.length);
     if (isEndReached) {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex }, allAccumulated);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, allAccumulated);
       setIsSubmitting(false);
       setStep('FINISHED');
       return;
@@ -114,7 +115,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       setCurrentStep(currentStep + 1);
     } else {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex }, allAccumulated);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, allAccumulated);
       setIsSubmitting(false);
       setStep('FINISHED');
     }
@@ -126,7 +127,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       questionId,
       optionId
     }));
-    await submitCompletedSurvey(survey.id, { ageGroup, sex }, formattedAnswers);
+    await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, formattedAnswers);
     setIsSubmitting(false);
     setStep('FINISHED');
   };
@@ -373,6 +374,16 @@ export default function SurveyClient({ survey }: { survey: any }) {
               <option value="none">Prefiero no decirlo</option>
             </select>
           </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Cuál es tu modalidad de trabajo?</label>
+            <select className="input-base" style={{ padding: '1rem', fontSize: '1.05rem' }} value={workMode} onChange={e => setWorkMode(e.target.value)}>
+              <option value="">Selecciona una opción...</option>
+              <option value="Remoto">Remoto</option>
+              <option value="Presencial">Presencial</option>
+              <option value="Híbrido">Híbrido</option>
+              <option value="none">Prefiero no decirlo</option>
+            </select>
+          </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -388,7 +399,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             className="btn-primary"
             style={{ padding: '1.1rem 2.8rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
             onClick={handleStart}
-            disabled={isSubmitting || !ageGroup || !sex}
+            disabled={isSubmitting || !ageGroup || !sex || !workMode}
           >
             {isSubmitting ? 'Iniciando...' : 'Ir a las Preguntas →'}
           </button>

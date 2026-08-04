@@ -121,6 +121,7 @@ model Response {
   ageGroup  String?
   sex       String?
   location  String?
+  workMode  String?
   answers   Answer[]
   survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
