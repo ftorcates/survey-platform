@@ -115,15 +115,16 @@ model Option {
 }
 
 model Response {
-  id        String   @id @default(cuid())
-  surveyId  String
-  createdAt DateTime @default(now())
-  ageGroup  String?
-  sex       String?
-  location  String?
-  workMode  String?
-  answers   Answer[]
-  survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  surveyId   String
+  createdAt  DateTime @default(now())
+  ageGroup   String?
+  sex        String?
+  location   String?
+  department String?
+  tenure     String?
+  answers    Answer[]
+  survey     Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
 
 model Answer {
