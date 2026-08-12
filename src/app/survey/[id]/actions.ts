@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma"
 
-export async function startSurveyResponse(surveyId: string, demographics: { ageGroup?: string, sex?: string, location?: string, workMode?: string }) {
+export async function startSurveyResponse(surveyId: string, demographics: { ageGroup?: string, sex?: string, location?: string, department?: string, tenure?: string }) {
   const response = await prisma.response.create({
     data: {
       surveyId,
@@ -25,7 +25,7 @@ export async function saveAnswer(responseId: string, questionId: string, textVal
 
 export async function submitCompletedSurvey(
   surveyId: string,
-  demographics: { ageGroup?: string; sex?: string; location?: string; workMode?: string },
+  demographics: { ageGroup?: string; sex?: string; location?: string; department?: string; tenure?: string },
   answers: Array<{ questionId: string; textValue?: string; optionId?: string }>
 ) {
   const response = await prisma.response.create({
@@ -34,7 +34,8 @@ export async function submitCompletedSurvey(
       ageGroup: demographics.ageGroup || null,
       sex: demographics.sex || null,
       location: demographics.location || null,
-      workMode: demographics.workMode || null,
+      department: demographics.department || null,
+      tenure: demographics.tenure || null,
       answers: {
         create: answers.map(a => ({
           questionId: a.questionId,

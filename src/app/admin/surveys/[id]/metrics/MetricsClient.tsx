@@ -88,13 +88,21 @@ export default function MetricsClient({ survey }: { survey: any }) {
   }, {});
   const sexChartData = Object.keys(sexData).map(key => ({ name: key, value: sexData[key] }));
 
-  // Work mode grouping
-  const workModeData = survey.responses.reduce((acc: any, response: any) => {
-    const mode = response.workMode === 'none' ? 'Prefiero no decirlo' : (response.workMode || 'No especificado');
-    acc[mode] = (acc[mode] || 0) + 1;
+  // Department grouping
+  const deptData = survey.responses.reduce((acc: any, response: any) => {
+    const dept = response.department || 'No especificado';
+    acc[dept] = (acc[dept] || 0) + 1;
     return acc;
   }, {});
-  const workModeChartData = Object.keys(workModeData).map(key => ({ name: key, value: workModeData[key] }));
+  const deptChartData = Object.keys(deptData).map(key => ({ name: key, value: deptData[key] }));
+
+  // Tenure grouping
+  const tenureData = survey.responses.reduce((acc: any, response: any) => {
+    const tenure = response.tenure || 'No especificado';
+    acc[tenure] = (acc[tenure] || 0) + 1;
+    return acc;
+  }, {});
+  const tenureChartData = Object.keys(tenureData).map(key => ({ name: key, value: tenureData[key] }));
 
   const exportToExcel = async () => {
     const ExcelJS = (await import('exceljs')).default;
@@ -110,7 +118,12 @@ export default function MetricsClient({ survey }: { survey: any }) {
       // Add Demographics if required by survey
       sheet.addRow([`Respuesta #${idx + 1}`]);
       if (survey.requireDemographics) {
-        const demoRow = sheet.addRow([`Edad: ${response.ageGroup || 'N/A'}`, `Sexo: ${response.sex === 'M' ? 'Masculino' : response.sex === 'F' ? 'Femenino' : response.sex || 'N/A'}`, `Modalidad: ${response.workMode || 'N/A'}`]);
+        const demoRow = sheet.addRow([
+          `Edad: ${response.ageGroup || 'N/A'}`,
+          `Sexo: ${response.sex === 'M' ? 'Masculino' : response.sex === 'F' ? 'Femenino' : response.sex || 'N/A'}`,
+          `Departamento: ${response.department || 'N/A'}`,
+          `Antigüedad: ${response.tenure || 'N/A'}`
+        ]);
         demoRow.font = { bold: true };
       }
       sheet.addRow([]);
@@ -495,6 +508,19 @@ export default function MetricsClient({ survey }: { survey: any }) {
       await addChartToSheet('chart-dimensions', 'Distribución por Dimensiones Medidas');
     }
 
+    if (document.getElementById('chart-edad')) {
+      await addChartToSheet('chart-edad', 'Demográfico: Distribución por Edad');
+    }
+    if (document.getElementById('chart-sexo')) {
+      await addChartToSheet('chart-sexo', 'Demográfico: Distribución por Sexo');
+    }
+    if (document.getElementById('chart-departamento')) {
+      await addChartToSheet('chart-departamento', 'Demográfico: Distribución por Departamento / Área');
+    }
+    if (document.getElementById('chart-antiguedad')) {
+      await addChartToSheet('chart-antiguedad', 'Demográfico: Antigüedad en la Empresa');
+    }
+
     for (let idx = 0; idx < survey.questions.length; idx++) {
       const q = survey.questions[idx];
       if (q.type !== 'TEXT') {
@@ -579,16 +605,35 @@ export default function MetricsClient({ survey }: { survey: any }) {
               </ResponsiveContainer>
             </div>
 
-            <div id="chart-modalidad" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
+            <div id="chart-departamento" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
               <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
-                <button onClick={() => downloadImage('chart-modalidad', 'png', 'distribucion_modalidad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
-                <button onClick={() => downloadImage('chart-modalidad', 'jpeg', 'distribucion_modalidad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+                <button onClick={() => downloadImage('chart-departamento', 'png', 'distribucion_departamento')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                <button onClick={() => downloadImage('chart-departamento', 'jpeg', 'distribucion_departamento')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Modalidad de Trabajo</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Departamento / Área</h3>
+              <ResponsiveContainer width="100%" height="85%">
+                <BarChart data={deptChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
+                  <Bar dataKey="value" fill="var(--color-secondary, #23b7a4)" radius={[4, 4, 0, 0]}>
+                    <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 600 }} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div id="chart-antiguedad" className="card" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
+              <div className="hide-on-download" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+                <button onClick={() => downloadImage('chart-antiguedad', 'png', 'distribucion_antiguedad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>PNG</button>
+                <button onClick={() => downloadImage('chart-antiguedad', 'jpeg', 'distribucion_antiguedad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
+              </div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Antigüedad en la Empresa</h3>
               <ResponsiveContainer width="100%" height="85%">
                 <PieChart>
-                  <Pie data={workModeChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
-                    {workModeChartData.map((entry, index) => (
+                  <Pie data={tenureChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name} (${value})`} labelLine={false} style={{ fontSize: '12px', fontWeight: 500 }}>
+                    {tenureChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
                     ))}
                   </Pie>

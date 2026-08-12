@@ -15,7 +15,8 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // Demographics state
   const [ageGroup, setAgeGroup] = useState("");
   const [sex, setSex] = useState("");
-  const [workMode, setWorkMode] = useState("");
+  const [department, setDepartment] = useState("");
+  const [tenure, setTenure] = useState("");
 
   // Current & accumulated answer state (Dynamic flow)
   const [textAnswer, setTextAnswer] = useState("");
@@ -26,6 +27,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
   // Matrix answer state (Fixed Scale flow)
   const [matrixAnswers, setMatrixAnswers] = useState<Record<string, string>>({});
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
+  const [showBlockValidation, setShowBlockValidation] = useState(false);
 
   // Build blocks sequence for FIXED_SCALE surveys
   const rawBlocks = survey.blocks || [];
@@ -49,7 +51,9 @@ export default function SurveyClient({ survey }: { survey: any }) {
     activeBlocks = [{ id: 'empty', title: 'Evaluación', questions: [] }];
   }
   const currentBlockQuestions = activeBlocks[currentBlockIndex]?.questions || [];
-  const isCurrentBlockComplete = currentBlockQuestions.every((q: any) => Boolean(matrixAnswers[q.id]));
+  const answeredBlockCount = currentBlockQuestions.filter((q: any) => Boolean(matrixAnswers[q.id])).length;
+  const pendingBlockCount = currentBlockQuestions.length - answeredBlockCount;
+  const isCurrentBlockComplete = pendingBlockCount === 0;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,7 +63,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
       setCurrentStep(0);
     } else {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, []);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, department, tenure }, []);
       setIsSubmitting(false);
       setStep('FINISHED');
     }
@@ -96,7 +100,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
     const isEndReached = nextQId === 'END' || (!nextQId && currentStep + 1 >= survey.questions.length);
     if (isEndReached) {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, allAccumulated);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, department, tenure }, allAccumulated);
       setIsSubmitting(false);
       setStep('FINISHED');
       return;
@@ -115,19 +119,24 @@ export default function SurveyClient({ survey }: { survey: any }) {
       setCurrentStep(currentStep + 1);
     } else {
       setIsSubmitting(true);
-      await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, allAccumulated);
+      await submitCompletedSurvey(survey.id, { ageGroup, sex, department, tenure }, allAccumulated);
       setIsSubmitting(false);
       setStep('FINISHED');
     }
   };
 
   const handleSubmitMatrix = async () => {
+    if (!isCurrentBlockComplete) {
+      setShowBlockValidation(true);
+      return;
+    }
+    setShowBlockValidation(false);
     setIsSubmitting(true);
     const formattedAnswers = Object.entries(matrixAnswers).map(([questionId, optionId]) => ({
       questionId,
       optionId
     }));
-    await submitCompletedSurvey(survey.id, { ageGroup, sex, workMode }, formattedAnswers);
+    await submitCompletedSurvey(survey.id, { ageGroup, sex, department, tenure }, formattedAnswers);
     setIsSubmitting(false);
     setStep('FINISHED');
   };
@@ -361,7 +370,6 @@ export default function SurveyClient({ survey }: { survey: any }) {
               <option value="35-44">35 - 44 años</option>
               <option value="45-54">45 - 54 años</option>
               <option value="55+">55+ años</option>
-              <option value="none">Prefiero no decirlo</option>
             </select>
           </div>
           <div>
@@ -371,17 +379,28 @@ export default function SurveyClient({ survey }: { survey: any }) {
               <option value="M">Masculino</option>
               <option value="F">Femenino</option>
               <option value="Other">Otro</option>
-              <option value="none">Prefiero no decirlo</option>
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Cuál es tu modalidad de trabajo?</label>
-            <select className="input-base" style={{ padding: '1rem', fontSize: '1.05rem' }} value={workMode} onChange={e => setWorkMode(e.target.value)}>
+            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿En qué departamento o área trabajas?</label>
+            <input
+              type="text"
+              className="input-base"
+              style={{ padding: '1rem', fontSize: '1.05rem', width: '100%' }}
+              placeholder="Ej. Operaciones, Tecnología, RRHH..."
+              value={department}
+              onChange={e => setDepartment(e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.6rem', fontWeight: 600, color: 'var(--color-text-main)' }}>¿Cuál es tu antiguedad en la empresa?</label>
+            <select className="input-base" style={{ padding: '1rem', fontSize: '1.05rem' }} value={tenure} onChange={e => setTenure(e.target.value)}>
               <option value="">Selecciona una opción...</option>
-              <option value="Remoto">Remoto</option>
-              <option value="Presencial">Presencial</option>
-              <option value="Híbrido">Híbrido</option>
-              <option value="none">Prefiero no decirlo</option>
+              <option value="Menos de 1 año">Menos de 1 año</option>
+              <option value="1 - 3 años">1 - 3 años</option>
+              <option value="3 - 5 años">3 - 5 años</option>
+              <option value="5 - 10 años">5 - 10 años</option>
+              <option value="Más de 10 años">Más de 10 años</option>
             </select>
           </div>
         </div>
@@ -399,7 +418,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
             className="btn-primary"
             style={{ padding: '1.1rem 2.8rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
             onClick={handleStart}
-            disabled={isSubmitting || !ageGroup || !sex || !workMode}
+            disabled={isSubmitting || !ageGroup || !sex || !department || !tenure}
           >
             {isSubmitting ? 'Iniciando...' : 'Ir a las Preguntas →'}
           </button>
@@ -458,13 +477,30 @@ export default function SurveyClient({ survey }: { survey: any }) {
             className="card"
             style={{ padding: '2.5rem', width: '100%' }}
           >
-            <div style={{ marginBottom: '2rem' }}>
-              <span className="eyebrow">
-                {activeBlocks.length > 1 ? `Bloque ${currentBlockIndex + 1} de ${activeBlocks.length}` : "Escala completa"}
+            <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <span className="eyebrow">
+                  {activeBlocks.length > 1 ? `Bloque ${currentBlockIndex + 1} de ${activeBlocks.length}: ${activeBlocks[currentBlockIndex]?.title || ''}` : "Escala completa"}
+                </span>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>
+                  Por favor evalúa las siguientes afirmaciones
+                </h2>
+              </div>
+
+              <span
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  backgroundColor: isCurrentBlockComplete ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: isCurrentBlockComplete ? '#10B981' : '#EF4444',
+                  border: `1px solid ${isCurrentBlockComplete ? '#10B98144' : '#EF444444'}`,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isCurrentBlockComplete ? '✓ Bloque completado' : `${answeredBlockCount} de ${currentBlockQuestions.length} respondidas`}
               </span>
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 600, marginTop: '0.5rem', color: 'var(--color-text-main)' }}>
-                Por favor evalúa las siguientes afirmaciones
-              </h2>
             </div>
 
             <div style={{ overflowX: 'auto', marginBottom: '2.5rem' }}>
@@ -480,37 +516,51 @@ export default function SurveyClient({ survey }: { survey: any }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentBlockQuestions.map((q: any) => (
-                    <tr key={q.id} style={{ borderBottom: '1px solid var(--color-border)', backgroundColor: matrixAnswers[q.id] ? 'transparent' : 'rgba(239, 68, 68, 0.02)' }}>
-                      <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>{q.text}</td>
-                      {survey.options.map((opt: any) => (
-                        <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
-                          <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
-                            <div style={{
-                              width: '26px',
-                              height: '26px',
-                              borderRadius: '50%',
-                              border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.2s',
-                              backgroundColor: matrixAnswers[q.id] === opt.id ? 'var(--color-accent-soft)' : 'transparent'
-                            }}>
-                              {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
-                            </div>
-                            <input
-                              type="radio"
-                              name={`matrix-${q.id}`}
-                              checked={matrixAnswers[q.id] === opt.id}
-                              onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
-                              style={{ display: 'none' }}
-                            />
-                          </label>
+                  {currentBlockQuestions.map((q: any) => {
+                    const isAnswered = Boolean(matrixAnswers[q.id]);
+                    const isMissing = showBlockValidation && !isAnswered;
+                    return (
+                      <tr
+                        key={q.id}
+                        style={{
+                          borderBottom: '1px solid var(--color-border)',
+                          backgroundColor: isMissing ? 'rgba(239, 68, 68, 0.05)' : 'transparent',
+                          borderLeft: isMissing ? '4px solid var(--color-error, #EF4444)' : '4px solid transparent',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <td style={{ padding: '1.5rem 1rem', textAlign: 'left', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text-main)' }}>
+                          {q.text} {isMissing && <span style={{ color: 'var(--color-error, #EF4444)', fontSize: '0.8rem', marginLeft: '0.35rem', fontWeight: 700 }}>* Requerida</span>}
                         </td>
-                      ))}
-                    </tr>
-                  ))}
+                        {survey.options.map((opt: any) => (
+                          <td key={opt.id} style={{ padding: '1.5rem 0.5rem' }}>
+                            <label style={{ display: 'flex', justifyContent: 'center', cursor: 'pointer', height: '100%', width: '100%' }}>
+                              <div style={{
+                                width: '26px',
+                                height: '26px',
+                                borderRadius: '50%',
+                                border: `2px solid ${matrixAnswers[q.id] === opt.id ? 'var(--color-primary)' : 'var(--color-text-muted)'}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                                backgroundColor: matrixAnswers[q.id] === opt.id ? 'var(--color-accent-soft)' : 'transparent'
+                              }}>
+                                {matrixAnswers[q.id] === opt.id && <div style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--color-primary)' }} />}
+                              </div>
+                              <input
+                                type="radio"
+                                name={`matrix-${q.id}`}
+                                checked={matrixAnswers[q.id] === opt.id}
+                                onChange={() => setMatrixAnswers(prev => ({ ...prev, [q.id]: opt.id }))}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -521,6 +571,7 @@ export default function SurveyClient({ survey }: { survey: any }) {
                   type="button"
                   className="btn-secondary"
                   onClick={() => {
+                    setShowBlockValidation(false);
                     setCurrentBlockIndex(prev => prev - 1);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
@@ -532,30 +583,42 @@ export default function SurveyClient({ survey }: { survey: any }) {
                 <div />
               )}
 
-              {currentBlockIndex < activeBlocks.length - 1 ? (
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => {
-                    setCurrentBlockIndex(prev => prev + 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  disabled={!isCurrentBlockComplete}
-                  style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px', marginLeft: 'auto' }}
-                >
-                  Siguiente →
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={handleSubmitMatrix}
-                  disabled={isSubmitting || !isCurrentBlockComplete}
-                  style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px', marginLeft: 'auto' }}
-                >
-                  {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
-                </button>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', marginLeft: 'auto', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {showBlockValidation && !isCurrentBlockComplete && (
+                  <span style={{ fontSize: '0.9rem', color: 'var(--color-error, #EF4444)', fontWeight: 600 }}>
+                    ⚠️ Responde la{pendingBlockCount > 1 ? 's' : ''} <strong>{pendingBlockCount}</strong> {pendingBlockCount > 1 ? 'preguntas pendientes' : 'pregunta pendiente'} para continuar
+                  </span>
+                )}
+
+                {currentBlockIndex < activeBlocks.length - 1 ? (
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => {
+                      if (!isCurrentBlockComplete) {
+                        setShowBlockValidation(true);
+                        return;
+                      }
+                      setShowBlockValidation(false);
+                      setCurrentBlockIndex(prev => prev + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
+                  >
+                    Siguiente →
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleSubmitMatrix}
+                    disabled={isSubmitting}
+                    style={{ padding: '1.25rem 3.5rem', fontSize: '1.15rem', fontWeight: 700, borderRadius: '40px' }}
+                  >
+                    {isSubmitting ? 'Guardando...' : 'Finalizar encuesta'}
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         </AnimatePresence>
