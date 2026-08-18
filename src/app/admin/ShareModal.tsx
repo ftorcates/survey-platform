@@ -1,12 +1,19 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { Share2, Copy, Check, Download, X } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 
 export default function ShareModal({ surveyId }: { surveyId: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const url = useMemo(
     () => (typeof window === "undefined" ? "" : `${window.location.origin}/survey/${surveyId}`),
     [surveyId]
@@ -62,35 +69,35 @@ export default function ShareModal({ surveyId }: { surveyId: string }) {
         <Share2 size={16} style={{ marginRight: '0.5rem' }} /> Compartir Encuesta
       </button>
 
-      {isOpen && (
-        <div className="modal-backdrop">
-          <div className="modal-panel" style={{ width: '100%', maxWidth: '440px', position: 'relative' }}>
+      {isOpen && mounted && createPortal(
+        <div className="modal-backdrop" style={{ zIndex: 9999 }}>
+          <div className="modal-panel" style={{ width: '100%', maxWidth: '440px', position: 'relative', padding: '1.75rem', boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.75)' }}>
             <button 
               onClick={() => setIsOpen(false)}
               className="btn-ghost"
               style={{ position: 'absolute', top: '1rem', right: '1rem', padding: "0.35rem" }}
             >
-              <X size={24} />
+              <X size={20} />
             </button>
 
-            <div className="eyebrow" style={{ marginBottom: "1rem" }}>Compartir encuesta</div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '1.5rem' }}>Enlace y QR de acceso</h3>
+            <div className="eyebrow" style={{ marginBottom: "0.6rem" }}>Compartir encuesta</div>
+            <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1.25rem', color: 'var(--color-text-main)' }}>Enlace y QR de acceso</h3>
 
             {/* Enlace Directo */}
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--color-text-main)' }}>Enlace Directo</label>
+            <div style={{ marginBottom: '1.75rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--color-text-main)' }}>Enlace Directo</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input 
                   type="text" 
                   readOnly 
                   value={url} 
                   className="input-base" 
-                  style={{ flex: 1, fontSize: '0.875rem', padding: '0.7rem 0.85rem', outline: 'none' }} 
+                  style={{ flex: 1, fontSize: '0.875rem', padding: '0.65rem 0.85rem', outline: 'none', background: 'var(--color-bg)' }} 
                 />
                 <button 
                   onClick={handleCopy}
                   className="btn-primary" 
-                  style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ padding: '0.65rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}
                   title="Copiar Enlace"
                 >
                   {copied ? <Check size={18} /> : <Copy size={18} />}
@@ -100,21 +107,22 @@ export default function ShareModal({ surveyId }: { surveyId: string }) {
 
             {/* Código QR */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-main)' }}>Código QR (Escaneable)</label>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-text-main)' }}>Código QR (Escaneable)</label>
               <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: "1px solid var(--color-border)" }}>
-                <QRCodeSVG id={`qr-${surveyId}`} value={url} size={200} level="H" includeMargin={true} />
+                <QRCodeSVG id={`qr-${surveyId}`} value={url} size={190} level="H" includeMargin={true} />
               </div>
               <button 
                 onClick={handleDownload}
                 className="btn-secondary" 
-                style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1rem', fontWeight: 600 }}
               >
                 <Download size={16} /> Descargar QR (PNG)
               </button>
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
