@@ -4,11 +4,15 @@ import Link from "next/link"
 import { ArrowLeft, ChartColumn } from "lucide-react"
 import MetricsClient from "./MetricsClient"
 import { auth } from "@/auth"
+import { getSurveyUserRole } from "@/lib/permissions"
 
 export default async function MetricsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const resolvedParams = await params;
   
+  const role = await getSurveyUserRole(resolvedParams.id, session?.user?.id);
+  if (!role) return notFound();
+
   const survey = await prisma.survey.findUnique({
     where: { id: resolvedParams.id },
     include: {
@@ -29,7 +33,7 @@ export default async function MetricsPage({ params }: { params: Promise<{ id: st
     }
   });
 
-  if (!survey || survey.authorId !== session?.user?.id) return notFound();
+  if (!survey) return notFound();
 
   return (
     <div style={{ maxWidth: '1480px', margin: '0 auto', width: '100%', paddingBottom: '3rem' }}>
