@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
+import { getSurveyUserRole } from "@/lib/permissions"
 
 export async function getSurveys() {
   const session = await auth();
@@ -262,3 +263,42 @@ export async function updateUserProfile(data: { name: string }) {
 
   revalidatePath("/admin/settings");
 }
+
+export async function getSurveyPublicMetricsStatus(surveyId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("No autorizado");
+
+  const role = await getSurveyUserRole(surveyId, session.user.id);
+  if (!role) throw new Error("No autorizado");
+
+  const survey = await prisma.survey.findUnique({
+    where: { id: surveyId },
+    select: { isMetricsPublic: true, title: true }
+  });
+
+  return { 
+    isMetricsPublic: survey?.isMetricsPublic ?? false,
+    title: survey?.title ?? ""
+  };
+}
+
+export async function togglePublicMetrics(surveyId: string, enabled: boolean) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autorizado" };
+
+  const role = await getSurveyUserRole(surveyId, session.user.id);
+  if (role !== 'OWNER' && role !== 'EDIT') {
+    return { error: "Solo el creador o editores autorizados pueden modificar la visibilidad pública de las métricas." };
+  }
+
+  await prisma.survey.update({
+    where: { id: surveyId },
+    data: { isMetricsPublic: enabled }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/surveys/${surveyId}/metrics`);
+  revalidatePath(`/metrics/${surveyId}`);
+  return { success: true, isMetricsPublic: enabled };
+}
+

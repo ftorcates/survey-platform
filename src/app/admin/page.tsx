@@ -156,11 +156,11 @@ export default async function AdminDashboard() {
                     <BarChart2 size={16} /> Métricas
                   </Link>
                   <ShareModal surveyId={survey.id} />
+                  {canEdit && (
+                    <ShareCollaboratorsModal surveyId={survey.id} surveyTitle={survey.title} />
+                  )}
                   {isOwner && (
-                    <>
-                      <ShareCollaboratorsModal surveyId={survey.id} surveyTitle={survey.title} />
-                      <DeleteSurveyButton surveyId={survey.id} />
-                    </>
+                    <DeleteSurveyButton surveyId={survey.id} />
                   )}
                 </div>
               </article>
