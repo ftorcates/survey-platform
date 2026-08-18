@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
+import { useState, useEffect, useRef, ReactNode } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from 'recharts';
 import { toPng, toJpeg } from 'html-to-image';
 import { generateQuestionAnalytics, getDistributionPattern } from '@/lib/statistics';
@@ -100,6 +101,64 @@ const CustomXAxisTick = (props: any) => {
     </g>
   );
 };
+
+function InViewChart({
+  children,
+  minHeight = '100%',
+  threshold = 0.1,
+  rootMargin = "0px 0px -40px 0px"
+}: {
+  children: (isInView: boolean) => ReactNode;
+  minHeight?: number | string;
+  threshold?: number;
+  rootMargin?: string;
+}) {
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold, rootMargin }
+    );
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [threshold, rootMargin]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        minHeight,
+        minWidth: 0,
+        opacity: isInView ? 1 : 0.05,
+        transform: isInView ? 'translateY(0)' : 'translateY(16px)',
+        transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+      }}
+    >
+      {isInView ? children(true) : null}
+    </div>
+  );
+}
 
 export default function MetricsClient({ survey }: { survey: any }) {
   const downloadImage = async (elementId: string, format: 'png' | 'jpeg', filename: string) => {
@@ -685,18 +744,24 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <button onClick={() => downloadImage('chart-edad', 'jpeg', 'distribucion_edad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Edad</h3>
-              <ResponsiveContainer width="100%" height="85%">
-                <BarChart data={ageChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
-                  <ChartDefs />
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                  <Tooltip content={<ModernTooltip unit="personas" />} cursor={{ fill: 'rgba(79, 138, 139, 0.08)', radius: 6 }} />
-                  <Bar dataKey="value" name="Respuestas" fill="url(#gradPrimary)" radius={[8, 8, 2, 2]} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out">
-                    <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 700 }} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div style={{ width: '100%', height: '85%' }}>
+                <InViewChart minHeight="100%">
+                  {(isInView) => (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={ageChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                        <ChartDefs />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                        <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                        <Tooltip content={<ModernTooltip unit="personas" />} cursor={{ fill: 'rgba(79, 138, 139, 0.08)', radius: 6 }} />
+                        <Bar dataKey="value" name="Respuestas" fill="url(#gradPrimary)" radius={[8, 8, 2, 2]} isAnimationActive={isInView} animationDuration={1200} animationEasing="ease-out">
+                          <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 700 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </InViewChart>
+              </div>
             </div>
             
             <div id="chart-sexo" className="card metric-chart-panel" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
@@ -705,33 +770,39 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <button onClick={() => downloadImage('chart-sexo', 'jpeg', 'distribucion_sexo')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Género</h3>
-              <ResponsiveContainer width="100%" height="85%">
-                <PieChart>
-                  <Pie
-                    data={sexChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={95}
-                    paddingAngle={4}
-                    cornerRadius={6}
-                    dataKey="value"
-                    nameKey="name"
-                    label={({ name, value }) => `${name} (${value})`}
-                    labelLine={false}
-                    style={{ fontSize: '12px', fontWeight: 600 }}
-                    isAnimationActive={true}
-                    animationDuration={1300}
-                    animationEasing="ease-out"
-                  >
-                    {sexChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<ModernTooltip unit="respuestas" />} />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ width: '100%', height: '85%' }}>
+                <InViewChart minHeight="100%">
+                  {(isInView) => (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={sexChartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={55}
+                          outerRadius={95}
+                          paddingAngle={4}
+                          cornerRadius={6}
+                          dataKey="value"
+                          nameKey="name"
+                          label={({ name, value }) => `${name} (${value})`}
+                          labelLine={false}
+                          style={{ fontSize: '12px', fontWeight: 600 }}
+                          isAnimationActive={isInView}
+                          animationDuration={1300}
+                          animationEasing="ease-out"
+                        >
+                          {sexChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<ModernTooltip unit="respuestas" />} />
+                        <Legend verticalAlign="bottom" height={36} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                </InViewChart>
+              </div>
             </div>
 
             <div id="chart-departamento" className="card metric-chart-panel" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
@@ -740,18 +811,24 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <button onClick={() => downloadImage('chart-departamento', 'jpeg', 'distribucion_departamento')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución por Departamento / Área</h3>
-              <ResponsiveContainer width="100%" height="85%">
-                <BarChart data={deptChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
-                  <ChartDefs />
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                  <Tooltip content={<ModernTooltip unit="empleados" />} cursor={{ fill: 'rgba(35, 183, 164, 0.08)', radius: 6 }} />
-                  <Bar dataKey="value" name="Personal" fill="url(#gradSecondary)" radius={[8, 8, 2, 2]} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out">
-                    <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 700 }} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div style={{ width: '100%', height: '85%' }}>
+                <InViewChart minHeight="100%">
+                  {(isInView) => (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={deptChartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                        <ChartDefs />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                        <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                        <Tooltip content={<ModernTooltip unit="empleados" />} cursor={{ fill: 'rgba(35, 183, 164, 0.08)', radius: 6 }} />
+                        <Bar dataKey="value" name="Personal" fill="url(#gradSecondary)" radius={[8, 8, 2, 2]} isAnimationActive={isInView} animationDuration={1200} animationEasing="ease-out">
+                          <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '12px', fontWeight: 700 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </InViewChart>
+              </div>
             </div>
 
             <div id="chart-antiguedad" className="card metric-chart-panel" style={{ padding: '1.75rem', height: '380px', minWidth: 0, position: 'relative' }}>
@@ -760,33 +837,37 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <button onClick={() => downloadImage('chart-antiguedad', 'jpeg', 'distribucion_antiguedad')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.5rem', textAlign: 'center' }}>Antigüedad en la Empresa</h3>
-              <ResponsiveContainer width="100%" height="85%">
-                <PieChart>
-                  <Pie
-                    data={tenureChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={95}
-                    paddingAngle={4}
-                    cornerRadius={6}
-                    dataKey="value"
-                    nameKey="name"
-                    label={({ name, value }) => `${name} (${value})`}
-                    labelLine={false}
-                    style={{ fontSize: '12px', fontWeight: 600 }}
-                    isAnimationActive={true}
-                    animationDuration={1300}
-                    animationEasing="ease-out"
-                  >
-                    {tenureChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<ModernTooltip unit="respuestas" />} />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ width: '100%', height: '85%' }}>
+                <InViewChart minHeight="100%">
+                  {(isInView) => (
+                    <PieChart>
+                      <Pie
+                        data={tenureChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={95}
+                        paddingAngle={4}
+                        cornerRadius={6}
+                        dataKey="value"
+                        nameKey="name"
+                        label={({ name, value }) => `${name} (${value})`}
+                        labelLine={false}
+                        style={{ fontSize: '12px', fontWeight: 600 }}
+                        isAnimationActive={isInView}
+                        animationDuration={1300}
+                        animationEasing="ease-out"
+                      >
+                        {tenureChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<ModernTooltip unit="respuestas" />} />
+                      <Legend verticalAlign="bottom" height={36} />
+                    </PieChart>
+                  )}
+                </InViewChart>
+              </div>
             </div>
           </div>
         </>
@@ -890,18 +971,24 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <button onClick={() => downloadImage('chart-global', 'jpeg', 'frecuencia_absoluta_acumulada')} style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '4px', padding: '0.3rem 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600 }}>JPG</button>
               </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '1.5rem', textAlign: 'center' }}>Distribución de Frecuencia Absoluta Acumulada</h3>
-              <ResponsiveContainer width="100%" height="85%">
-                <BarChart data={globalCounts} margin={{ top: 20, right: 30, left: 20, bottom: 25 }}>
-                  <ChartDefs />
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                  <Tooltip content={<ModernTooltip unit="veces" />} cursor={{ fill: 'rgba(16, 185, 129, 0.08)', radius: 6 }} />
-                  <Bar dataKey="count" name="Frecuencia" fill="url(#gradEmerald)" radius={[8, 8, 2, 2]} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out">
-                    <LabelList dataKey="count" position="top" formatter={(val: any) => `${val ?? ''}`} style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 700 }} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <div style={{ width: '100%', height: '85%' }}>
+                <InViewChart minHeight="100%">
+                  {(isInView) => (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={globalCounts} margin={{ top: 20, right: 30, left: 20, bottom: 25 }}>
+                        <ChartDefs />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                        <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
+                        <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                        <Tooltip content={<ModernTooltip unit="veces" />} cursor={{ fill: 'rgba(16, 185, 129, 0.08)', radius: 6 }} />
+                        <Bar dataKey="count" name="Frecuencia" fill="url(#gradEmerald)" radius={[8, 8, 2, 2]} isAnimationActive={isInView} animationDuration={1200} animationEasing="ease-out">
+                          <LabelList dataKey="count" position="top" formatter={(val: any) => `${val ?? ''}`} style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 700 }} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </InViewChart>
+              </div>
             </div>
 
             {/* Gráfico por Dimensiones / Bloques (Solo si existen bloques en la encuesta) */}
@@ -960,21 +1047,25 @@ export default function MetricsClient({ survey }: { survey: any }) {
                     Comparativo de tendencias (% Satisfechos, % Neutros, % Insatisfechos) por cada bloque o dimensión del estudio.
                   </p>
                   <div style={{ height: '350px', width: '100%', minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={dimensionsChartData} margin={{ top: 25, right: 30, left: 10, bottom: 20 }}>
-                        <ChartDefs />
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                        <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fontSize: 13, fontWeight: 700, fill: 'var(--color-text-main)' }} />
-                        <YAxis unit="%" domain={[0, 100]} axisLine={false} tickLine={false} />
-                        <Tooltip content={<ModernTooltip unit="%" />} cursor={{ fill: 'rgba(255,255,255,0.04)', radius: 6 }} />
-                        <Legend verticalAlign="bottom" height={40} />
-                        {blocks.map((b: any, index: number) => (
-                          <Bar key={b.id} dataKey={b.title} fill={COLORS[index % COLORS.length]} radius={[6, 6, 2, 2]} isAnimationActive={true} animationDuration={1300} animationEasing="ease-out">
-                            <LabelList dataKey={b.title} position="top" formatter={(val: any) => (val && Number(val) > 0) ? `${Number(val).toFixed(0)}%` : ''} style={{ fill: 'var(--color-text-main)', fontSize: '11px', fontWeight: 600 }} />
-                          </Bar>
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <InViewChart minHeight="350px">
+                      {(isInView) => (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={dimensionsChartData} margin={{ top: 25, right: 30, left: 10, bottom: 20 }}>
+                            <ChartDefs />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                            <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fontSize: 13, fontWeight: 700, fill: 'var(--color-text-main)' }} />
+                            <YAxis unit="%" domain={[0, 100]} axisLine={false} tickLine={false} />
+                            <Tooltip content={<ModernTooltip unit="%" />} cursor={{ fill: 'rgba(255,255,255,0.04)', radius: 6 }} />
+                            <Legend verticalAlign="bottom" height={40} />
+                            {blocks.map((b: any, index: number) => (
+                              <Bar key={b.id} dataKey={b.title} fill={COLORS[index % COLORS.length]} radius={[6, 6, 2, 2]} isAnimationActive={isInView} animationDuration={1300} animationEasing="ease-out">
+                                <LabelList dataKey={b.title} position="top" formatter={(val: any) => (val && Number(val) > 0) ? `${Number(val).toFixed(0)}%` : ''} style={{ fill: 'var(--color-text-main)', fontSize: '11px', fontWeight: 600 }} />
+                              </Bar>
+                            ))}
+                          </BarChart>
+                        </ResponsiveContainer>
+                      )}
+                    </InViewChart>
                   </div>
                 </div>
               );
@@ -1098,18 +1189,22 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 </div>
                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1.25rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Análisis Marginal)</span></h3>
                 <div style={{ height: '320px', width: '100%', minWidth: 0 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
-                      <ChartDefs />
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                      <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
-                      <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
-                      <Tooltip content={<ModernTooltip unit="respuestas" />} cursor={{ fill: 'rgba(79, 138, 139, 0.08)', radius: 6 }} />
-                      <Bar dataKey="value" name="Respuestas" fill="url(#gradPrimary)" radius={[8, 8, 2, 2]} isAnimationActive={true} animationDuration={1200} animationEasing="ease-out">
-                        <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 700 }} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <InViewChart minHeight="320px">
+                    {(isInView) => (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barChartData} margin={{ top: 20, right: 30, left: 10, bottom: 25 }}>
+                          <ChartDefs />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                          <XAxis dataKey="name" interval={0} axisLine={false} tickLine={false} tick={<CustomXAxisTick />} height={45} />
+                          <YAxis allowDecimals={false} axisLine={false} tickLine={false} />
+                          <Tooltip content={<ModernTooltip unit="respuestas" />} cursor={{ fill: 'rgba(79, 138, 139, 0.08)', radius: 6 }} />
+                          <Bar dataKey="value" name="Respuestas" fill="url(#gradPrimary)" radius={[8, 8, 2, 2]} isAnimationActive={isInView} animationDuration={1200} animationEasing="ease-out">
+                            <LabelList dataKey="value" position="top" style={{ fill: 'var(--color-text-main)', fontSize: '13px', fontWeight: 700 }} />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    )}
+                  </InViewChart>
                 </div>
               </div>
 
@@ -1122,33 +1217,37 @@ export default function MetricsClient({ survey }: { survey: any }) {
                 <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', paddingRight: '110px' }}>{i + 1}. {q.text} <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>(Porcentajes Válidos)</span></h3>
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '1.25rem' }}>Calculado sobre {q.answers.length} respuestas emitidas</span>
                 <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieChartData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={90}
-                        paddingAngle={3}
-                        cornerRadius={5}
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ percent }: { percent?: number }) => (percent && percent > 0) ? `${(percent * 100).toFixed(0)}%` : ''}
-                        labelLine={false}
-                        style={{ fontSize: '12px', fontWeight: 600 }}
-                        isAnimationActive={true}
-                        animationDuration={1300}
-                        animationEasing="ease-out"
-                      >
-                        {pieChartData.map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<ModernTooltip unit="respuestas" />} />
-                      <Legend verticalAlign="bottom" height={36} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <InViewChart minHeight="300px">
+                    {(isInView) => (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={pieChartData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={90}
+                            paddingAngle={3}
+                            cornerRadius={5}
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ percent }: { percent?: number }) => (percent && percent > 0) ? `${(percent * 100).toFixed(0)}%` : ''}
+                            labelLine={false}
+                            style={{ fontSize: '12px', fontWeight: 600 }}
+                            isAnimationActive={isInView}
+                            animationDuration={1300}
+                            animationEasing="ease-out"
+                          >
+                            {pieChartData.map((entry: any, index: number) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-surface, #172033)" strokeWidth={2} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<ModernTooltip unit="respuestas" />} />
+                          <Legend verticalAlign="bottom" height={36} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
+                  </InViewChart>
                 </div>
               </div>
             </div>
