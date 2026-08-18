@@ -2,8 +2,20 @@
 
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { auth } from "@/auth"
+import { getSurveyUserRole, hasRequiredRole } from "@/lib/permissions"
+
+async function assertCanEdit(surveyId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("No autorizado");
+  const role = await getSurveyUserRole(surveyId, session.user.id);
+  if (!hasRequiredRole(role, 'EDIT')) {
+    throw new Error("No tienes permisos para editar esta encuesta");
+  }
+}
 
 export async function addQuestion(surveyId: string, data: { text: string, type: 'TEXT' | 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE', blockId?: string }) {
+  await assertCanEdit(surveyId);
   const count = await prisma.question.count({ where: { surveyId } });
   
   await prisma.question.create({
@@ -20,6 +32,7 @@ export async function addQuestion(surveyId: string, data: { text: string, type: 
 }
 
 export async function addOption(questionId: string, surveyId: string, text: string) {
+  await assertCanEdit(surveyId);
   await prisma.option.create({
     data: {
       questionId,
@@ -30,6 +43,7 @@ export async function addOption(questionId: string, surveyId: string, text: stri
 }
 
 export async function updateBranching(optionId: string, nextQuestionId: string | null, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.option.update({
     where: { id: optionId },
     data: { nextQuestionId }
@@ -38,6 +52,7 @@ export async function updateBranching(optionId: string, nextQuestionId: string |
 }
 
 export async function updateQuestionBranching(questionId: string, nextQuestionId: string | null, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.question.update({
     where: { id: questionId },
     data: { nextQuestionId }
@@ -46,6 +61,7 @@ export async function updateQuestionBranching(questionId: string, nextQuestionId
 }
 
 export async function updateSurveyHeader(surveyId: string, data: { title: string, description: string | null }) {
+  await assertCanEdit(surveyId);
   await prisma.survey.update({
     where: { id: surveyId },
     data: {
@@ -57,6 +73,7 @@ export async function updateSurveyHeader(surveyId: string, data: { title: string
 }
 
 export async function updateQuestion(questionId: string, surveyId: string, data: { text: string, type: 'TEXT' | 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' }) {
+  await assertCanEdit(surveyId);
   await prisma.question.update({
     where: { id: questionId },
     data: {
@@ -68,6 +85,7 @@ export async function updateQuestion(questionId: string, surveyId: string, data:
 }
 
 export async function deleteQuestion(questionId: string, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.question.delete({
     where: { id: questionId }
   });
@@ -75,6 +93,7 @@ export async function deleteQuestion(questionId: string, surveyId: string) {
 }
 
 export async function deleteOption(optionId: string, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.option.delete({
     where: { id: optionId }
   });
@@ -82,6 +101,7 @@ export async function deleteOption(optionId: string, surveyId: string) {
 }
 
 export async function addBlock(surveyId: string, data: { title: string, description?: string }) {
+  await assertCanEdit(surveyId);
   const count = await prisma.questionBlock.count({ where: { surveyId } });
   await prisma.questionBlock.create({
     data: {
@@ -95,6 +115,7 @@ export async function addBlock(surveyId: string, data: { title: string, descript
 }
 
 export async function updateBlock(blockId: string, surveyId: string, data: { title: string, description?: string }) {
+  await assertCanEdit(surveyId);
   await prisma.questionBlock.update({
     where: { id: blockId },
     data: {
@@ -106,6 +127,7 @@ export async function updateBlock(blockId: string, surveyId: string, data: { tit
 }
 
 export async function deleteBlock(blockId: string, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.questionBlock.delete({
     where: { id: blockId }
   });
@@ -113,6 +135,7 @@ export async function deleteBlock(blockId: string, surveyId: string) {
 }
 
 export async function moveQuestionToBlock(questionId: string, blockId: string | null, surveyId: string) {
+  await assertCanEdit(surveyId);
   await prisma.question.update({
     where: { id: questionId },
     data: { blockId }
@@ -125,6 +148,7 @@ export async function updateScaleOptions(
   options: { id?: string; text: string; value: number }[],
   deletedIds: string[] = []
 ) {
+  await assertCanEdit(surveyId);
   for (const delId of deletedIds) {
     await prisma.option.delete({ where: { id: delId } }).catch(() => {});
   }

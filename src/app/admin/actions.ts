@@ -8,18 +8,39 @@ import { auth } from "@/auth"
 export async function getSurveys() {
   const session = await auth();
   if (!session?.user?.id) return [];
+  const userId = session.user.id;
 
-  return await prisma.survey.findMany({
+  const surveys = await prisma.survey.findMany({
     where: {
-      authorId: session.user.id
+      OR: [
+        { authorId: userId },
+        { shares: { some: { userId } } }
+      ]
     },
     orderBy: { createdAt: 'desc' },
     include: {
       _count: {
         select: { responses: true, questions: true }
+      },
+      shares: {
+        where: { userId },
+        select: { role: true }
+      },
+      author: {
+        select: { name: true, email: true }
       }
     }
-  })
+  });
+
+  return surveys.map(s => {
+    const isOwner = s.authorId === userId;
+    const shareRole = s.shares?.[0]?.role;
+    const userRole: 'OWNER' | 'EDIT' | 'READ' = isOwner ? 'OWNER' : (shareRole || 'READ');
+    return {
+      ...s,
+      userRole
+    };
+  });
 }
 
 export async function createSurvey(formData: FormData) {
@@ -76,7 +97,10 @@ export async function getGlobalAudience() {
   return await prisma.response.findMany({
     where: {
       survey: {
-        authorId: session.user.id
+        OR: [
+          { authorId: session.user.id },
+          { shares: { some: { userId: session.user.id } } }
+        ]
       }
     },
     include: {
@@ -92,13 +116,13 @@ export async function deleteSurvey(surveyId: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("No autorizado");
 
-  // Verificar que la encuesta pertenece al usuario
+  // Solo el propietario (autor) puede eliminar la encuesta
   const survey = await prisma.survey.findUnique({
     where: { id: surveyId }
   });
 
   if (!survey || survey.authorId !== session.user.id) {
-    throw new Error("No autorizado");
+    throw new Error("Solo el creador de la encuesta puede eliminarla.");
   }
 
   await prisma.survey.delete({
@@ -106,6 +130,125 @@ export async function deleteSurvey(surveyId: string) {
   });
 
   revalidatePath("/admin");
+}
+
+export async function getSurveyShares(surveyId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("No autorizado");
+
+  const survey = await prisma.survey.findUnique({
+    where: { id: surveyId },
+    select: { authorId: true }
+  });
+
+  if (!survey || survey.authorId !== session.user.id) {
+    throw new Error("Solo el creador puede ver las configuraciones de compartición.");
+  }
+
+  return await prisma.surveyShare.findMany({
+    where: { surveyId },
+    include: {
+      user: {
+        select: { id: true, name: true, email: true, image: true }
+      }
+    },
+    orderBy: { createdAt: 'asc' }
+  });
+}
+
+export async function shareSurvey(surveyId: string, email: string, role: 'READ' | 'EDIT') {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autorizado" };
+
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail) return { error: "Por favor ingresa un correo electrónico válido." };
+
+  const survey = await prisma.survey.findUnique({
+    where: { id: surveyId },
+    select: { authorId: true }
+  });
+
+  if (!survey || survey.authorId !== session.user.id) {
+    return { error: "Solo el creador de la encuesta puede compartirla." };
+  }
+
+  const targetUser = await prisma.user.findUnique({
+    where: { email: cleanEmail }
+  });
+
+  if (!targetUser) {
+    return { error: `No encontramos un usuario registrado con el correo: ${cleanEmail}. Pídele que inicie sesión en la plataforma primero.` };
+  }
+
+  if (targetUser.id === session.user.id) {
+    return { error: "No puedes compartir la encuesta contigo mismo (ya eres el propietario)." };
+  }
+
+  await prisma.surveyShare.upsert({
+    where: {
+      surveyId_userId: {
+        surveyId,
+        userId: targetUser.id
+      }
+    },
+    create: {
+      surveyId,
+      userId: targetUser.id,
+      role
+    },
+    update: {
+      role
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/surveys/${surveyId}/edit`);
+  return { success: true };
+}
+
+export async function updateSurveyShareRole(shareId: string, role: 'READ' | 'EDIT') {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autorizado" };
+
+  const share = await prisma.surveyShare.findUnique({
+    where: { id: shareId },
+    include: { survey: { select: { authorId: true, id: true } } }
+  });
+
+  if (!share || share.survey.authorId !== session.user.id) {
+    return { error: "Solo el creador de la encuesta puede modificar los permisos." };
+  }
+
+  await prisma.surveyShare.update({
+    where: { id: shareId },
+    data: { role }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/surveys/${share.survey.id}/edit`);
+  return { success: true };
+}
+
+export async function removeSurveyShare(shareId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "No autorizado" };
+
+  const share = await prisma.surveyShare.findUnique({
+    where: { id: shareId },
+    include: { survey: { select: { authorId: true, id: true } } }
+  });
+
+  if (!share || share.survey.authorId !== session.user.id) {
+    return { error: "Solo el creador de la encuesta puede revocar el acceso." };
+  }
+
+  await prisma.surveyShare.delete({
+    where: { id: shareId }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/surveys/${share.survey.id}/edit`);
+  return { success: true };
 }
 
 export async function updateUserProfile(data: { name: string }) {

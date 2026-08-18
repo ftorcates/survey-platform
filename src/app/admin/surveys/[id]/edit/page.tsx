@@ -1,14 +1,23 @@
 import prisma from "@/lib/prisma"
 import SurveyBuilder from "./SurveyBuilder"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, PencilRuler } from "lucide-react"
 import { auth } from "@/auth"
+import { getSurveyUserRole } from "@/lib/permissions"
 
 export default async function EditSurveyPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const resolvedParams = await params;
   
+  const role = await getSurveyUserRole(resolvedParams.id, session?.user?.id);
+  if (!role) return notFound();
+
+  // Si el usuario solo tiene permisos de lectura, lo redirigimos a la vista de métricas
+  if (role === 'READ') {
+    redirect(`/admin/surveys/${resolvedParams.id}/metrics`);
+  }
+
   const survey = await prisma.survey.findUnique({
     where: { id: resolvedParams.id },
     include: {
@@ -25,7 +34,7 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
     }
   });
 
-  if (!survey || survey.authorId !== session?.user?.id) return notFound();
+  if (!survey) return notFound();
 
   return (
     <div style={{ maxWidth: '1040px' }}>
@@ -39,7 +48,7 @@ export default async function EditSurveyPage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
-      <SurveyBuilder survey={survey} />
+      <SurveyBuilder survey={survey} userRole={role} />
     </div>
   )
 }

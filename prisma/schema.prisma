@@ -11,6 +11,11 @@ enum SurveyType {
   FIXED_SCALE
 }
 
+enum ShareRole {
+  READ
+  EDIT
+}
+
 model Survey {
   id                  String     @id @default(cuid())
   title               String
@@ -31,6 +36,7 @@ model Survey {
   author              User?          @relation(fields: [authorId], references: [id])
   options             Option[]
   blocks              QuestionBlock[]
+  shares              SurveyShare[]
 }
 
 model User {
@@ -42,6 +48,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   surveys       Survey[]
+  sharedSurveys SurveyShare[]
 }
 
 model Account {
@@ -142,4 +149,18 @@ enum QuestionType {
   TEXT
   SINGLE_CHOICE
   MULTIPLE_CHOICE
+}
+
+model SurveyShare {
+  id        String    @id @default(cuid())
+  surveyId  String
+  userId    String
+  role      ShareRole @default(READ)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([surveyId, userId])
 }

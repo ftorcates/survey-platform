@@ -18,10 +18,11 @@ import {
   updateScaleOptions
 } from "./actions"
 import { Plus, GitBranch, Edit3, Trash2, Check, X, Save, List, Layers, FolderPlus } from "lucide-react"
+import ShareCollaboratorsModal from "@/app/admin/ShareCollaboratorsModal"
 
 type SurveyData = any;
 
-export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
+export default function SurveyBuilder({ survey, userRole = 'OWNER' }: { survey: SurveyData, userRole?: 'OWNER' | 'EDIT' | 'READ' }) {
   const [newQuestionText, setNewQuestionText] = useState("");
   const [newQuestionType, setNewQuestionType] = useState<'TEXT' | 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE'>('SINGLE_CHOICE');
   
@@ -137,10 +138,15 @@ export default function SurveyBuilder({ survey }: { survey: SurveyData }) {
                 {survey.description || "Sin descripción"}
               </p>
             </div>
-            <div style={{ flexShrink: 0 }}>
+            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button onClick={() => setIsEditingHeader(true)} className="btn-secondary" style={{ padding: '0.65rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                 <Edit3 size={17} /> Editar Info
               </button>
+              {userRole === 'OWNER' && (
+                <div style={{ display: 'inline-block' }}>
+                  <ShareCollaboratorsModal surveyId={survey.id} surveyTitle={survey.title} />
+                </div>
+              )}
             </div>
           </div>
         ) : (
