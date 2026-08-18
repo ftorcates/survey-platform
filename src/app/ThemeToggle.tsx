@@ -34,6 +34,7 @@ export default function ThemeToggle() {
   const toggleTheme = () => {
     const nextTheme: Theme = isLight ? "dark" : "light";
     document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.style.colorScheme = nextTheme;
     window.localStorage.setItem(STORAGE_KEY, nextTheme);
     window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
